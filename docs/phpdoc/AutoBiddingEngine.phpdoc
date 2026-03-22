@@ -1,0 +1,140 @@
+/**
+ * AutoBiddingEngine - Core service for automatic bidding orchestration
+ *
+ * ## Purpose
+ * Manages the automatic bidding workflow when new manual bids are placed on an auction.
+ * Coordinates proxy bid evaluation, auto-bid placement, and logging.
+ *
+ * @package    WooCommerce Auction
+ * @subpackage Services
+ * @version    1.0.0
+ * @requirement REQ-AB-001: Automatic bidding engine
+ * @requirement REQ-AB-002: Place auto-bids when manual bids placed
+ * @requirement REQ-AB-004: Performance requirements (< 1s for 100 proxies)
+ * @requirement REQ-AB-005: Audit logging for all attempts
+ *
+ * ## UML Class Diagram
+ *
+ * ┌─────────────────────────────────────────────────┐
+ * │         AutoBiddingEngine                       │
+ * ├─────────────────────────────────────────────────┤
+ * │ - enabled: bool                                 │
+ * │ - proxy_repository: ProxyBidRepository          │
+ * │ - log_repository: AutoBidLogRepository          │
+ * │ - proxy_service: ProxyBidService                │
+ * │ - calculator: BidIncrementCalculator            │
+ * ├─────────────────────────────────────────────────┤
+ * │ + handleNewBid(): void                          │
+ * │ + setEnabled(bool): self                        │
+ * │ + setCalculator(): self                         │
+ * │ + getAuctionStatistics(): array                 │
+ * └─────────────────────────────────────────────────┘
+ *            ▲
+ *            │ uses
+ *            ├─────────────────────┬────────────────┬─────────────────┐
+ *            │                     │                │                 │
+ *  ┌──────────────────────┐ ┌──────────────────┐ ┌──────────────────┐ ┌──────────────┐
+ *  │ ProxyBidRepository   │ │ ProxyBidService  │ │ BidIncrement    │ │ AutoBidLog  │
+ *  │                      │ │                  │ │ Calculator      │ │ Repository  │
+ *  │ + findActive...()    │ │ + updateCurrent..│ │ + calculate()   │ │ + log()     │
+ *  │ + findById()         │ │ + markOutbid()   │ │                 │ │ + getStats()│
+ *  └──────────────────────┘ └──────────────────┘ └──────────────────┘ └──────────────┘
+ *
+ * ## Interaction Flow (Message Sequence Diagram)
+ *
+ *  Manual Bid Placed
+ *        │
+ *        ▼
+ *   handleNewBid()
+ *        │
+ *        ├─ Find active proxies for auction
+ *        │       │
+ *        │       ▼
+ *        │   [For each proxy]
+ *        │       │
+ *        │       ├─ Skip if same user as bidder
+ *        │       │
+ *        │       ├─ Check if proxy max >= required bid
+ *        │       │       │
+ *        │       │       ├─ YES → Place auto-bid via ProxyBidService
+ *        │       │       │              │
+ *        │       │       │              └─ updateCurrentBid()
+ *        │       │       │
+ *        │       │       └─ NO → Mark as outbid via ProxyBidService
+ *        │       │              │
+ *        │       │              └─ markOutbid()
+ *        │
+ *        └─ Log all attempts to AutoBidLogRepository
+ *
+ * ## Strategies
+ * 1. Enabled/Disabled: Engine can be disabled for testing or maintenance
+ * 2. Calculator Injectable: Supports different bid increment strategies
+ * 3. Fail-Safe: Exceptions logged, don't crash workflow
+ * 4. Performance Optimized: Batch operations, minimize DB calls
+ *
+ * ## Dependencies
+ * - ProxyBidRepository: Access active proxy bids
+ * - AutoBidLogRepository: Record all attempts
+ * - ProxyBidService: Update proxy bid status
+ * - BidIncrementCalculator: Calculate next bid amounts
+ *
+ * ## Example Usage
+ *
+ * ```php
+ * $engine = new AutoBiddingEngine(
+ *     $proxy_repo,
+ *     $log_repo,
+ *     $proxy_service,
+ *     $calculator
+ * );
+ *
+ * // Enable auto-bidding
+ * $engine->setEnabled(true);
+ *
+ * // Use percentage increment strategy
+ * $engine->setCalculator(
+ *     new BidIncrementCalculator(
+ *         BidIncrementCalculator::STRATEGY_PERCENTAGE,
+ *         ['percentage' => 0.10]
+ *     )
+ * );
+ *
+ * // Process when new bid placed
+ * $engine->handleNewBid(
+ *     $auction_id = 100,
+ *     $new_bid_amount = 150.00,
+ *     $bidder_user_id = 50,
+ *     $previous_bidder_id = 1
+ * );
+ *
+ * // Get statistics
+ * $stats = $engine->getAuctionStatistics(100);
+ * echo $stats['total_attempts']; // 5
+ * echo $stats['successful_attempts']; // 3
+ * ```
+ *
+ * ## Performance Considerations
+ * - REQ-AB-004: Must process 100 proxy bids in under 1 second
+ * - Uses indexed queries on auction_id and status
+ * - Batch operations to minimize database round-trips
+ * - Lazy loading of bid increment calculator configuration
+ *
+ * ## Logging Strategy (REQ-AB-005)
+ * Every call to handleNewBid() generates log entries:
+ * - 1 entry per proxy bid evaluated (success or failure)
+ * - Includes processing time, bid amount, user IDs
+ * - Status codes: PLACED, OUTBID, SKIPPED
+ *
+ * ## Error Handling
+ * - Exceptions from ProxyBidService caught and logged
+ * - Invalid state transitions logged as warnings
+ * - Business logic errors caught separately from system errors
+ *
+ * @see ProxyBidService for proxy bid status updates
+ * @see BidIncrementCalculator for bid increment strategies
+ * @see AutoBidLogRepository for audit trail storage
+ * @see ProxyBid for proxy bid entity reference
+ */
+class AutoBiddingEngine {
+    // ... implementation details ...
+}
