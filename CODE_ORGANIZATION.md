@@ -4,7 +4,8 @@
 
 **Base Project**: YITH Auctions for WooCommerce v1.2.4  
 **Base Repository**: https://yithemes.com/themes/plugins/yith-auctions-for-woocommerce/  
-**Forked From**: Original code dated **March 22, 2026**  
+**Original Code Date**: December 2018  
+**Fork Repository Setup**: March 22, 2026  
 **Current Status**: Fork with extended features (Starting Bid, Bid Increments, Reserve Price)
 
 ---

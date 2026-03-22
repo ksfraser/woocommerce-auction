@@ -6,12 +6,14 @@ Extended fork of YITH Auctions for WooCommerce with professional-grade testing i
 
 ## About This Fork
 
-This project is a **maintained fork** of **YITH Auctions for WooCommerce v1.2.4**, originally forked on **March 22, 2026**.
+This project is a **maintained fork** of **YITH Auctions for WooCommerce v1.2.4**, originally created in **December 2018**.
 
 ### Original Project
 - **Author**: YITH  
 - **License**: GPL 3.0  
 - **URL**: https://yithemes.com/themes/plugins/yith-auctions-for-woocommerce/
+- **Original Code Date**: December 2018
+- **Fork Repository Setup**: March 22, 2026
 
 ### Why Fork?
 The original YITH plugin provided a solid foundation for auction functionality in WooCommerce, but lacked:
