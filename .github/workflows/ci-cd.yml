@@ -2,9 +2,9 @@ name: CI/CD - Testing & Quality Assurance
 
 on:
   push:
-    branches: [main, develop, starting_bid]
+    branches: [main]
   pull_request:
-    branches: [main, develop]
+    branches: [main]
 
 jobs:
   test:

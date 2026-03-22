@@ -1,5 +1,7 @@
 # Docker Setup Guide for YITH Auctions for WooCommerce
 
+> 💡 **Cost Optimization Tip**: This guide covers Docker for **local development**. For **free CI/CD** without GitHub minute charges, see [LOCAL-RUNNER-SETUP.md](LOCAL-RUNNER-SETUP.md) to run the CI/CD pipeline on your local machine (self-hosted runner). This eliminates charges entirely!
+
 ## Quick Start
 
 ### Prerequisites
