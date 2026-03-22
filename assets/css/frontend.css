@@ -68,3 +68,23 @@ body {
     font-weight: bold;
     font-size: 1.10em;
 }
+
+/* Bid error message */
+.yith-wcact-bid-error {
+    color: #a00;
+    font-weight: 600;
+    margin: 10px 0;
+    padding: 8px 12px;
+    background: #fef1f1;
+    border-left: 4px solid #dc3232;
+}
+
+/* Reserve not met notice */
+.yith-wcact-auction-notice h2 {
+    color: #856404;
+    background-color: #fff3cd;
+    border: 1px solid #ffeeba;
+    padding: 12px 20px;
+    font-size: 1em;
+    font-weight: 600;
+}

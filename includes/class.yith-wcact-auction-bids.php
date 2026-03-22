@@ -59,16 +59,28 @@ if ( !class_exists( 'YITH_WCACT_Bids' ) ) {
         }
 
         /**
-         * @param        $user_id
-         * @param        $auction_id
-         * @param        $bid
-         * @param        $date
+         * Add a bid to the auction.
+         *
+         * @param int    $user_id    The user placing the bid.
+         * @param int    $auction_id The auction product ID.
+         * @param string $bid        The bid amount.
+         * @param string $date       The bid datetime.
+         *
+         * @requirement REQ-001 Starting bid
          */
         public function add_bid( $user_id, $auction_id, $bid, $date) {
             global $wpdb;
 
-            $insert_query = "INSERT INTO $this->table_name (`user_id`, `auction_id`, `bid`, `date`) VALUES ('" . $user_id . "', '" . $auction_id . "', '" . $bid . "' , '" . $date . "' )";
-            $wpdb->query( $insert_query );
+            $wpdb->insert(
+                $this->table_name,
+                array(
+                    'user_id'    => absint( $user_id ),
+                    'auction_id' => absint( $auction_id ),
+                    'bid'        => sanitize_text_field( $bid ),
+                    'date'       => sanitize_text_field( $date ),
+                ),
+                array( '%d', '%d', '%s', '%s' )
+            );
         }
 
         /**

@@ -92,7 +92,7 @@ if ( ! class_exists( 'YITH_Auction_Finish_Auction' ) ) {
 
                 $current_user_id = get_current_user_id();
 
-                if ($current_user_id == $max_bid->user_id && $product->is_closed()) {  //check if you are the winner user and if the auction is finished
+                if ($current_user_id == $max_bid->user_id && $product->is_closed() && $product->is_reserve_met()) {  //check if you are the winner user, auction is finished, and reserve is met
 
 
                     //empty cart
@@ -147,7 +147,7 @@ if ( ! class_exists( 'YITH_Auction_Finish_Auction' ) ) {
 
             ?>
             <?php if ( !empty($_GET['redirect_after_login'] ) ) : ?>
-                <input type="hidden" name="redirect" value="<?php echo $_GET['redirect_after_login'] ?>" />
+                <input type="hidden" name="redirect" value="<?php echo esc_url( $_GET['redirect_after_login'] ) ?>" />
             <?php endif ?>
             <?php
 

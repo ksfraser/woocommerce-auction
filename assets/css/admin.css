@@ -66,3 +66,37 @@
 .yith_auction_prices:hover{
 	background: #ccc !important;
 }
+
+/* Bid Increment Ranges Table */
+.yith-wcact-bid-increment-table {
+	width: 100%;
+	border-collapse: collapse;
+	margin: 10px 0;
+}
+.yith-wcact-bid-increment-table th,
+.yith-wcact-bid-increment-table td {
+	border: 1px solid #ddd;
+	padding: 8px 10px;
+	text-align: left;
+}
+.yith-wcact-bid-increment-table th {
+	background-color: #f1f1f1;
+	font-weight: 600;
+}
+.yith-wcact-bid-increment-table input[type="number"] {
+	width: 120px;
+}
+.yith-wcact-bid-increment-table .remove-row {
+	color: #a00;
+	cursor: pointer;
+	text-decoration: none;
+}
+.yith-wcact-bid-increment-table .remove-row:hover {
+	color: #dc3232;
+}
+.yith-wcact-bid-increment-actions {
+	margin: 10px 0;
+}
+.yith-wcact-bid-increment-actions .button {
+	margin-right: 5px;
+}

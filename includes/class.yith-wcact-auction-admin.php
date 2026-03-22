@@ -131,6 +131,12 @@ if ( !class_exists( 'YITH_Auction_Admin' ) ) {
             add_filter( 'plugin_action_links_' . plugin_basename( YITH_WCACT_PATH . '/' . basename( YITH_WCACT_FILE ) ), array( $this, 'action_links' ) );
             add_filter( 'yith_show_plugin_row_meta', array( $this, 'plugin_row_meta' ), 10, 5 );
 
+            // Custom settings field for bid increment ranges
+            add_action( 'woocommerce_admin_field_yith_wcact_bid_increment_ranges', array( $this, 'render_bid_increment_ranges_field' ) );
+            add_action( 'woocommerce_update_options_yith_wcact_panel_product_auction', array( $this, 'save_global_bid_increment_ranges' ) );
+
+            // AJAX handlers for product bid increment ranges
+            add_action( 'wp_ajax_yith_wcact_copy_global_increments', array( $this, 'ajax_copy_global_increments' ) );
         }
 
         /**
@@ -361,6 +367,18 @@ if ( !class_exists( 'YITH_Auction_Admin' ) ) {
          * @author   Carlos Rodríguez <carlos.rodriguez@yourinspiration.it>
          * @since    1.0.6
          */
+        /**
+         * Save the data input into the auction product box.
+         *
+         * Handles saving of auction dates, starting bid, reserve price,
+         * and product-specific bid increment ranges.
+         *
+         * @param int $post_id The product post ID.
+         *
+         * @requirement REQ-001 Starting bid
+         * @requirement REQ-002 Bid increment by price range
+         * @requirement REQ-003 Reserve price
+         */
         public function save_auction_data($post_id)
         {
 
@@ -370,15 +388,50 @@ if ( !class_exists( 'YITH_Auction_Admin' ) ) {
                 $auction_product = wc_get_product($post_id);
 
                 if (isset($_POST['_yith_auction_for'])) {
-                    $my_date = $_POST['_yith_auction_for'];
+                    $my_date = sanitize_text_field( wp_unslash( $_POST['_yith_auction_for'] ) );
                     $gmt_date = get_gmt_from_date($my_date);
                     yit_save_prop($auction_product, '_yith_auction_for', strtotime($gmt_date),true);
                 }
                 if (isset($_POST['_yith_auction_to'])) {
-                    $my_date = $_POST['_yith_auction_to'];
+                    $my_date = sanitize_text_field( wp_unslash( $_POST['_yith_auction_to'] ) );
                     $gmt_date = get_gmt_from_date($my_date);
                     yit_save_prop($auction_product, '_yith_auction_to', strtotime($gmt_date),true);
                 }
+
+                // Save starting bid (minimum bid)
+                if ( isset( $_POST['_yith_auction_start_price'] ) ) {
+                    $start_price = floatval( sanitize_text_field( wp_unslash( $_POST['_yith_auction_start_price'] ) ) );
+                    yit_save_prop( $auction_product, '_yith_auction_start_price', $start_price );
+                }
+
+                // Save reserve price
+                if ( isset( $_POST['_yith_auction_reserve_price'] ) ) {
+                    $reserve_price = floatval( sanitize_text_field( wp_unslash( $_POST['_yith_auction_reserve_price'] ) ) );
+                    yit_save_prop( $auction_product, '_yith_auction_reserve_price', $reserve_price );
+                }
+
+                // Save bid increment use_global checkbox
+                $use_global = isset( $_POST['_yith_auction_bid_increment_use_global'] ) ? 'yes' : 'no';
+                update_post_meta( $post_id, '_yith_auction_bid_increment_use_global', $use_global );
+
+                // Save product-specific bid increment ranges (if not using global)
+                if ( 'no' === $use_global && isset( $_POST['_yith_bid_increment_from_price'] ) ) {
+                    $from_prices = array_map( 'floatval', (array) $_POST['_yith_bid_increment_from_price'] );
+                    $increments  = isset( $_POST['_yith_bid_increment_amount'] )
+                        ? array_map( 'floatval', (array) $_POST['_yith_bid_increment_amount'] )
+                        : array();
+
+                    $ranges = array();
+                    foreach ( $from_prices as $i => $from_price ) {
+                        $inc = isset( $increments[ $i ] ) ? $increments[ $i ] : 1.0;
+                        $ranges[] = array(
+                            'from_price' => $from_price,
+                            'increment'  => $inc,
+                        );
+                    }
+                    YITH_WCACT_Bid_Increment::get_instance()->save_ranges( $post_id, $ranges );
+                }
+
                 // Prevent issue with stock managing
                 yit_save_prop($auction_product, 'manage_stock', 'yes');
                 yit_update_product_stock($auction_product,1,'set');
@@ -391,8 +444,8 @@ if ( !class_exists( 'YITH_Auction_Admin' ) ) {
                 $bids = YITH_Auctions()->bids;
                 $exist_auctions = $bids->get_max_bid($post_id);
                 if (!$exist_auctions) {
-                    yit_save_prop($auction_product, '_yith_auction_start_price',0);
-                    yit_save_prop($auction_product, '_price',0);
+                    $start = isset( $start_price ) ? $start_price : 0;
+                    yit_save_prop($auction_product, '_price', $start);
                 }
             }
         }
@@ -607,6 +660,118 @@ if ( !class_exists( 'YITH_Auction_Admin' ) ) {
             }
 
             return $new_row_meta_args;
+        }
+
+        /**
+         * Render the global bid increment ranges custom settings field.
+         *
+         * Displays a table where admin can add/remove price range rows
+         * with From Price and Increment columns.
+         *
+         * @param array $value The field configuration.
+         *
+         * @requirement REQ-002 Bid increment by price range
+         */
+        public function render_bid_increment_ranges_field( $value ) {
+            $bid_increment = YITH_WCACT_Bid_Increment::get_instance();
+            $ranges        = $bid_increment->get_ranges( 0 );
+            ?>
+            <tr valign="top">
+                <th scope="row" class="titledesc">
+                    <label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo esc_html( $value['title'] ); ?></label>
+                </th>
+                <td class="forminp">
+                    <table class="widefat yith-wcact-bid-increment-table" id="yith-wcact-global-bid-increments">
+                        <thead>
+                            <tr>
+                                <th><?php esc_html_e( 'From Price', 'yith-auctions-for-woocommerce' ); ?></th>
+                                <th><?php esc_html_e( 'Increment', 'yith-auctions-for-woocommerce' ); ?></th>
+                                <th>&nbsp;</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php if ( ! empty( $ranges ) ) : ?>
+                                <?php foreach ( $ranges as $range ) : ?>
+                                    <tr>
+                                        <td><input type="number" step="0.01" min="0" name="_yith_global_bid_increment_from_price[]" value="<?php echo esc_attr( $range->from_price ); ?>" /></td>
+                                        <td><input type="number" step="0.01" min="0.01" name="_yith_global_bid_increment_amount[]" value="<?php echo esc_attr( $range->increment ); ?>" /></td>
+                                        <td><button type="button" class="button yith-wcact-remove-row"><?php esc_html_e( 'Remove', 'yith-auctions-for-woocommerce' ); ?></button></td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            <?php else : ?>
+                                <tr>
+                                    <td><input type="number" step="0.01" min="0" name="_yith_global_bid_increment_from_price[]" value="0.00" /></td>
+                                    <td><input type="number" step="0.01" min="0.01" name="_yith_global_bid_increment_amount[]" value="1.00" /></td>
+                                    <td><button type="button" class="button yith-wcact-remove-row"><?php esc_html_e( 'Remove', 'yith-auctions-for-woocommerce' ); ?></button></td>
+                                </tr>
+                            <?php endif; ?>
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan="3">
+                                    <button type="button" class="button button-primary yith-wcact-add-row"><?php esc_html_e( 'Add Range', 'yith-auctions-for-woocommerce' ); ?></button>
+                                </td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                    <p class="description"><?php esc_html_e( 'From Price: the minimum current bid price for this range to apply. Increment: the minimum bid increase amount.', 'yith-auctions-for-woocommerce' ); ?></p>
+                </td>
+            </tr>
+            <?php
+        }
+
+        /**
+         * Save global bid increment ranges from the settings panel.
+         *
+         * @requirement REQ-002 Bid increment by price range
+         */
+        public function save_global_bid_increment_ranges() {
+            if ( ! isset( $_POST['_yith_global_bid_increment_from_price'] ) ) {
+                return;
+            }
+
+            if ( ! current_user_can( 'manage_options' ) ) {
+                return;
+            }
+
+            $from_prices = array_map( 'floatval', (array) $_POST['_yith_global_bid_increment_from_price'] );
+            $increments  = isset( $_POST['_yith_global_bid_increment_amount'] )
+                ? array_map( 'floatval', (array) $_POST['_yith_global_bid_increment_amount'] )
+                : array();
+
+            $ranges = array();
+            foreach ( $from_prices as $i => $from_price ) {
+                $inc = isset( $increments[ $i ] ) ? $increments[ $i ] : 1.0;
+                $ranges[] = array(
+                    'from_price' => $from_price,
+                    'increment'  => $inc,
+                );
+            }
+
+            YITH_WCACT_Bid_Increment::get_instance()->save_ranges( 0, $ranges );
+        }
+
+        /**
+         * AJAX handler: copy global bid increment ranges to a product.
+         *
+         * @requirement REQ-002 Bid increment by price range
+         */
+        public function ajax_copy_global_increments() {
+            if ( ! current_user_can( 'manage_options' ) ) {
+                wp_send_json_error( 'Unauthorized' );
+            }
+
+            $product_id = isset( $_POST['product_id'] ) ? absint( $_POST['product_id'] ) : 0;
+
+            if ( $product_id <= 0 ) {
+                wp_send_json_error( 'Invalid product ID' );
+            }
+
+            $bid_increment = YITH_WCACT_Bid_Increment::get_instance();
+            $bid_increment->copy_global_to_product( $product_id );
+            $ranges = $bid_increment->get_ranges( $product_id );
+
+            wp_send_json_success( $ranges );
         }
     }
 }

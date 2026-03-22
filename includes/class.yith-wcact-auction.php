@@ -87,6 +87,7 @@ if ( ! class_exists( 'YITH_Auctions' ) ) {
                         'includes/class.yith-wcact-auction-product.php',
                         'includes/class.yith-wcact-auction-db.php',
                         'includes/class.yith-wcact-auction-bids.php',
+                        'includes/class.yith-wcact-bid-increment.php',
                         'includes/class.yith-wcact-auction-ajax.php',
                         'includes/class.yith-wcact-auction-my-auctions.php',
                         'includes/class.yith-wcact-auction-finish-auction.php',
@@ -134,6 +135,7 @@ if ( ! class_exists( 'YITH_Auctions' ) ) {
 
         public function init_classes(){
             $this->bids = YITH_WCACT_Bids::get_instance();
+            $this->bid_increment = YITH_WCACT_Bid_Increment::get_instance();
             $this->ajax = YITH_WCACT_Auction_Ajax::get_instance();
             $this->compatibility = YITH_WCACT_Compatibility::get_instance();
         }

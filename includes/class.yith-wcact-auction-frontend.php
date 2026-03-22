@@ -355,7 +355,7 @@ if ( !class_exists( 'YITH_Auction_Frontend' ) ) {
 
             ?>
             <?php if (!empty($_GET['redirect_after_login'])) : ?>
-            <input type="hidden" name="redirect" value="<?php echo $_GET['redirect_after_login'] ?>"/>
+            <input type="hidden" name="redirect" value="<?php echo esc_url( wp_sanitize_redirect( wp_unslash( $_GET['redirect_after_login'] ) ) ); ?>"/>
         <?php endif ?>
             <?php
 
@@ -366,13 +366,23 @@ if ( !class_exists( 'YITH_Auction_Frontend' ) ) {
             $instance = YITH_Auctions()->bids;
             $max_bid = $instance->get_max_bid($product->get_id());
 
+            // Check if the reserve price was met
+            if ( ! $product->is_reserve_met() ) {
+                ?>
+                <div id="yith-wcact-reserve-not-met" class="yith-wcact-auction-notice">
+                    <h2><?php esc_html_e('The reserve price was not met. This auction has ended without a winner.', 'yith-auctions-for-woocommerce'); ?></h2>
+                </div>
+                <?php
+                return;
+            }
+
             $current_user = wp_get_current_user();
 
             if ($max_bid && $current_user->ID == $max_bid->user_id) {
 
                 ?>
                 <div id="Congratulations">
-                    <h2><?php _e('Congratulations, you won this auction', 'yith-auctions-for-woocommerce') ?></h2>
+                    <h2><?php esc_html_e('Congratulations, you won this auction', 'yith-auctions-for-woocommerce'); ?></h2>
                 </div>
                 <form class="cart" method="get" enctype='multipart/form-data'>
                     <input type="hidden" name="yith-wcact-pay-won-auction"
@@ -382,7 +392,7 @@ if ( !class_exists( 'YITH_Auction_Frontend' ) ) {
                         ?>
                         <button type="submit" class="auction_add_to_cart_button button alt"
                                 id="yith-wcact-auction-won-auction">
-                            <?php echo sprintf(__('Pay now', 'yith-auctions-for-woocommerce')); ?>
+                            <?php echo esc_html__('Pay now', 'yith-auctions-for-woocommerce'); ?>
                         </button>
                         <?php
                     }

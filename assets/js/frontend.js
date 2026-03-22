@@ -48,23 +48,26 @@ jQuery(document).ready(function($) {
     }
 
     //Button up or down bid
-    var current = $('#time').data('current');
+    var current = parseFloat($('#time').data('current'));
+    var bidIncrement = parseFloat($('#time').data('bid-increment')) || 1;
+    var minimumBid = parseFloat($('#time').data('minimum-bid')) || current;
     $(".bid").click(function(e){
         e.preventDefault();
-        var actual_bid = $('#_actual_bid').val();
+        var actual_bid = parseFloat($('#_actual_bid').val());
         if($(this).hasClass("button_bid_add")){
-            if(!actual_bid){
-                actual_bid = current;
+            if(!actual_bid || isNaN(actual_bid)){
+                actual_bid = minimumBid;
+            } else {
+                actual_bid = actual_bid + bidIncrement;
             }
-            actual_bid++;
-            $('#_actual_bid').val(actual_bid);
+            $('#_actual_bid').val(actual_bid.toFixed(2));
         } else {
-            if(actual_bid){
-                actual_bid--;
-                if (actual_bid >= current){
-                    $('#_actual_bid').val(actual_bid);
+            if(actual_bid && !isNaN(actual_bid)){
+                actual_bid = actual_bid - bidIncrement;
+                if (actual_bid >= minimumBid){
+                    $('#_actual_bid').val(actual_bid.toFixed(2));
                 }else{
-                    $('#_actual_bid').val(current);
+                    $('#_actual_bid').val(minimumBid.toFixed(2));
                 }
             }
         }
@@ -86,11 +89,26 @@ jQuery(document).ready(function($) {
             data    : post_data,
             url     : object.ajaxurl,
             success : function ( response ) {
-                //console.log(response.url);
-                window.location = response.url;
+                if ( response.bid_accepted === false ) {
+                    // Remove any previous error message
+                    $( '#yith-wcact-bid-error' ).remove();
 
-                //window.location.reload(true);
-                // On Success
+                    var msg = response.message || 'Your bid was too low.';
+                    $( '#yith-wcact-form-bid' ).after(
+                        '<div id="yith-wcact-bid-error" class="yith-wcact-bid-error">' + $('<span>').text(msg).html() + '</div>'
+                    );
+
+                    // Update the input to the minimum allowed bid
+                    if ( response.minimum_bid ) {
+                        $( '#_actual_bid' ).val( parseFloat( response.minimum_bid ).toFixed(2) );
+                        minimumBid = parseFloat( response.minimum_bid );
+                    }
+                    if ( response.increment ) {
+                        bidIncrement = parseFloat( response.increment );
+                    }
+                } else {
+                    window.location = response.url;
+                }
             },
             complete: function () {
             }

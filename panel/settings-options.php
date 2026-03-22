@@ -54,7 +54,32 @@ return array(
                 'type' => 'sectionend',
                 'id'   => 'yith_wcact_settings_tab_auction_end'
             ),
-            
+
+            ////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+            'settings_bid_increment_options_start'    => array(
+                'type' => 'sectionstart',
+                'id'   => 'yith_wcact_settings_bid_increment_start'
+            ),
+
+            'settings_bid_increment_options_title'    => array(
+                'title' => _x( 'Global Bid Increment Ranges', 'Panel: page title', 'yith-auctions-for-woocommerce' ),
+                'type'  => 'title',
+                'desc'  => _x( 'Define bid increment amounts by price range. When the current bid falls within a range, the corresponding increment is the minimum amount a bidder must increase their bid. Products use these global ranges unless overridden at the product level.', 'Admin option description', 'yith-auctions-for-woocommerce' ),
+                'id'    => 'yith_wcact_settings_bid_increment_title'
+            ),
+
+            'settings_bid_increment_ranges' => array(
+                'title' => _x( 'Bid Increment Ranges', 'Admin option: Bid increment ranges', 'yith-auctions-for-woocommerce' ),
+                'type'  => 'yith_wcact_bid_increment_ranges',
+                'id'    => 'yith_wcact_global_bid_increment_ranges',
+            ),
+
+            'settings_bid_increment_options_end'      => array(
+                'type' => 'sectionend',
+                'id'   => 'yith_wcact_settings_bid_increment_end'
+            ),
+
             ////////////////////////////////////////////////////////////////////////////////////////////////////////////
         )
     )

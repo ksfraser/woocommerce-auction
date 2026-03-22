@@ -58,10 +58,15 @@ if ( !class_exists( 'YITH_WCACT_Auction_Ajax' ) ) {
         }
 
         /**
-         * Add a bid to the product
+         * Add a bid to the product.
          *
-         * @since  1.0.6
+         * Validates bid against starting price, minimum increment, and current price.
+         *
+         * @since  1.3.0
          * @author Carlos Rodríguez <carlos.rodriguez@yourinspiration.it>
+         *
+         * @requirement REQ-001 Starting bid (minimum bid)
+         * @requirement REQ-002 Bid increment by price range
          */
         public function yith_wcact_add_bid()
         {
@@ -74,34 +79,50 @@ if ( !class_exists( 'YITH_WCACT_Auction_Ajax' ) ) {
             }
 
             if ($userid && isset($_POST['bid']) && isset($_POST['product'])) {
-                $bid = $_POST['bid'];
-                $product_id = apply_filters( 'yith_wcact_auction_product_id',$_POST['product'] );
+                $bid = floatval( sanitize_text_field( wp_unslash( $_POST['bid'] ) ) );
+                $product_id = absint( apply_filters( 'yith_wcact_auction_product_id', absint( $_POST['product'] ) ) );
                 $date = date("Y-m-d H:i:s");
 
                 $product = wc_get_product($product_id);
                 if ($product && $product->is_type('auction')) {
                     $bids = YITH_Auctions()->bids;
-                    $current_price = $product->get_price();
+                    $current_price = (float) $product->get_price();
                     $exist_auctions = $bids->get_max_bid($product_id);
                     $last_bid_user = $bids->get_last_bid_user($userid, $product_id);
 
+                    // Get minimum bid (start price + increment enforcement)
+                    $minimum_bid = $product->get_minimum_bid();
+                    $bid_increment = $product->get_bid_increment();
+
+                    $bid_accepted = false;
+
                     if ($exist_auctions) {
-                        if ($bid > $current_price && !$last_bid_user) {
+                        // Bid must be >= current price + increment
+                        $min_next = (float) $exist_auctions->bid + $bid_increment;
+                        if ($bid >= $min_next && !$last_bid_user) {
                             $bids->add_bid($userid, $product_id, $bid, $date);
-                        } elseif ($bid > $last_bid_user && $bid > $current_price) {
+                            $bid_accepted = true;
+                        } elseif ($last_bid_user && $bid >= $min_next && $bid > (float) $last_bid_user) {
                             $bids->add_bid($userid, $product_id, $bid, $date);
+                            $bid_accepted = true;
                         }
                     } else {
-                        if ($bid >= $current_price) {
+                        // First bid: must meet or exceed start price
+                        if ($bid >= $minimum_bid) {
                             $bids->add_bid($userid, $product_id, $bid, $date);
+                            $bid_accepted = true;
                         }
                     }
+
                     $user_bid = array(
-                        'user_id' => $userid,
-                        'product_id' => $product_id,
-                        'bid' => $bid,
-                        'date' => $date,
-                        'url'   =>  get_permalink($product_id),
+                        'user_id'      => $userid,
+                        'product_id'   => $product_id,
+                        'bid'          => $bid,
+                        'date'         => $date,
+                        'url'          => get_permalink($product_id),
+                        'bid_accepted' => $bid_accepted,
+                        'minimum_bid'  => $minimum_bid,
+                        'increment'    => $bid_increment,
                     );
 
                     $actual_price = $product->get_current_bid();

@@ -89,12 +89,90 @@ if ( ! class_exists( 'WC_Product_Auction' ) ) {
 
 
         /**
-         *  Get start price of the product.
+         * Get start price (minimum starting bid) of the product.
          *
+         * @return float|false The start price or false if not set.
+         *
+         * @requirement REQ-001 Starting bid (minimum bid)
          */
         public function get_start_price() {
             $start_price = yit_get_prop($this,'_yith_auction_start_price');
             return isset( $start_price ) ? $start_price : false;
+        }
+
+        /**
+         * Get the reserve price for this auction product.
+         *
+         * The reserve price must be met for the auction to complete.
+         * If the highest bid is below the reserve price, the auction is not completed.
+         *
+         * @return float The reserve price, or 0 if none set.
+         *
+         * @requirement REQ-003 Reserve price
+         */
+        public function get_reserve_price() {
+            $reserve_price = yit_get_prop( $this, '_yith_auction_reserve_price' );
+            return ( isset( $reserve_price ) && '' !== $reserve_price ) ? (float) $reserve_price : 0.0;
+        }
+
+        /**
+         * Check if the reserve price has been met.
+         *
+         * @return bool True if reserve is met (or no reserve), false otherwise.
+         *
+         * @requirement REQ-003 Reserve price
+         */
+        public function is_reserve_met() {
+            $reserve = $this->get_reserve_price();
+
+            if ( $reserve <= 0 ) {
+                return true; // No reserve price set
+            }
+
+            $current_bid = $this->get_current_bid();
+
+            return ( (float) $current_bid >= $reserve );
+        }
+
+        /**
+         * Get the minimum bid increment for the current price of this product.
+         *
+         * Delegates to YITH_WCACT_Bid_Increment to look up the appropriate
+         * increment based on price range configuration.
+         *
+         * @return float The bid increment amount.
+         *
+         * @requirement REQ-002 Bid increment by price range
+         */
+        public function get_bid_increment() {
+            $current_price = $this->get_price();
+            $bid_increment = YITH_WCACT_Bid_Increment::get_instance();
+
+            return $bid_increment->get_increment_for_price( $current_price, $this->get_id() );
+        }
+
+        /**
+         * Get the minimum allowed next bid.
+         *
+         * Current price + bid increment for the current price range.
+         *
+         * @return float Minimum next bid amount.
+         *
+         * @requirement REQ-001 Starting bid
+         * @requirement REQ-002 Bid increment by price range
+         */
+        public function get_minimum_bid() {
+            $bids      = YITH_Auctions()->bids;
+            $max_bid   = $bids->get_max_bid( $this->get_id() );
+            $increment = $this->get_bid_increment();
+
+            if ( $max_bid && isset( $max_bid->bid ) ) {
+                return (float) $max_bid->bid + $increment;
+            }
+
+            // No bids yet: minimum is the start price
+            $start = $this->get_start_price();
+            return ( false !== $start && (float) $start > 0 ) ? (float) $start : $increment;
         }
 
 

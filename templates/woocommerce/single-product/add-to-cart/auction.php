@@ -37,14 +37,15 @@ echo apply_filters( 'woocommerce_stock_html', $availability_html, $availability[
                 <form class="cart" method="post" enctype='multipart/form-data'>
 
                     <?php
-                    $bid_increment = 1;
+                    $bid_increment = $product->get_bid_increment();
+                    $minimum_bid   = $product->get_minimum_bid();
                     $total = $auction_finish - $date;
 
                     do_action('yith_wcact_in_to_form_add_to_cart',$product);
                     
                     ?>
 
-                    <div id="time" class="timetito" data-remaining-time=" <?php echo $total ?>" data-bid-increment="<?php echo $bid_increment ?>" data-product="<?php echo $product->get_id()?>"data-current="<?php echo $product->get_price()?>"data-finish="<?php echo $auction_finish?>">
+                    <div id="time" class="timetito" data-remaining-time=" <?php echo esc_attr( $total ) ?>" data-bid-increment="<?php echo esc_attr( $bid_increment ) ?>" data-product="<?php echo esc_attr( $product->get_id() ) ?>" data-current="<?php echo esc_attr( $product->get_price() ) ?>" data-finish="<?php echo esc_attr( $auction_finish ) ?>" data-minimum-bid="<?php echo esc_attr( $minimum_bid ) ?>">
                         <label for="yith_time_left"><?php _e('Time left:', 'yith-auctions-for-woocommerce') ?></label>
                         <div id="yith-wcact-auction-timeleft">
                             <?php do_action('yith_wcact_auction_before_set_bid',$product) ?>

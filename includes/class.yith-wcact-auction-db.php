@@ -25,9 +25,11 @@ if ( !class_exists( 'YITH_WCACT_DB' ) ) {
          *
          * @var string
          */
-        public static $version = '1.0.0';
+        public static $version = '1.1.0';
 
         public static $auction_table = 'yith_wcact_auction';
+
+        public static $bid_increment_table = 'yith_wcact_bid_increment';
 
 
         /**
@@ -43,9 +45,11 @@ if ( !class_exists( 'YITH_WCACT_DB' ) ) {
         }
 
         /**
-         * create table for Notes
+         * Create database tables for auctions and bid increments.
          *
-         * @param bool $force
+         * @param bool $force Force table recreation.
+         *
+         * @requirement REQ-002 Bid increment by price range
          */
         public static function create_db_table( $force = false ) {
             global $wpdb;
@@ -55,11 +59,15 @@ if ( !class_exists( 'YITH_WCACT_DB' ) ) {
             if ( $force || $current_version != self::$version ) {
                 $wpdb->hide_errors();
 
-                $table_name      = $wpdb->prefix . self::$auction_table;
                 $charset_collate = $wpdb->get_charset_collate();
 
-                $sql
-                    = "CREATE TABLE $table_name (
+                if ( !function_exists( 'dbDelta' ) ) {
+                    require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
+                }
+
+                // Auction bids table
+                $table_name = $wpdb->prefix . self::$auction_table;
+                $sql = "CREATE TABLE $table_name (
                     `id` bigint(20) NOT NULL AUTO_INCREMENT,
                     `user_id` bigint(20) NOT NULL,
                     `auction_id` bigint(20) NOT NULL,
@@ -67,11 +75,21 @@ if ( !class_exists( 'YITH_WCACT_DB' ) ) {
                     `date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
                     PRIMARY KEY (id)
                     ) $charset_collate;";
-
-                if ( !function_exists( 'dbDelta' ) ) {
-                    require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
-                }
                 dbDelta( $sql );
+
+                // Bid increment ranges table
+                $increment_table = $wpdb->prefix . self::$bid_increment_table;
+                $sql_increment = "CREATE TABLE $increment_table (
+                    `id` bigint(20) NOT NULL AUTO_INCREMENT,
+                    `product_id` bigint(20) NOT NULL DEFAULT 0,
+                    `from_price` decimal(10,2) NOT NULL DEFAULT 0.00,
+                    `increment` decimal(10,2) NOT NULL DEFAULT 1.00,
+                    PRIMARY KEY (id),
+                    KEY `product_id` (`product_id`),
+                    KEY `from_price` (`from_price`)
+                    ) $charset_collate;";
+                dbDelta( $sql_increment );
+
                 update_option( 'yith_wcact_db_version', self::$version );
             }
         }
