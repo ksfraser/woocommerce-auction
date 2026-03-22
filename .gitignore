@@ -2,20 +2,81 @@
 /vendor/
 composer.lock
 
-# IDE
-.idea/
+# WordPress
+wp-config.php
+wp-content/plugins/hello.php
+wp-content/plugins/akismet/
+wp-content/themes/twentytwenty*
+wp-content/upgrade/
+wp-config-sample.php
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# IDE and Editor
 .vscode/
+.idea/
 *.swp
 *.swo
 *~
-
-# OS
 .DS_Store
 Thumbs.db
+.editorconfig
+*.sublime-project
+*.sublime-workspace
+.phpstorm.meta.php
 
-# PHPUnit
-.phpunit.result.cache
-/coverage/
-
-# Build artifacts
+# Build and compilation
 /build/
+/dist/
+/coverage/
+.phpcs-cache
+.phpstan
+*.min.js
+*.min.css
+
+# Testing
+tests/temp/
+tests/fixtures/
+.phpunit.cache
+.phpunit.result.cache
+clover.xml
+coverage.xml
+test-results.xml
+phpmd-report.xml
+phpcs-report.xml
+
+# Logs
+*.log
+debug.log
+error.log
+php-error.log
+
+# Node (if using build tools)
+node_modules/
+npm-debug.log
+yarn-error.log
+package-lock.json
+yarn.lock
+
+# Temporary files
+*.tmp
+*.bak
+.cache/
+.tmp/
+
+# Docker
+.dockerignore
+docker-compose.override.yml
+
+# OS specific
+.DS_Store
+.AppleDouble
+.LSOverride
+Thumbs.db
+ehthumbs.db
+
+# Project specific
+LOCAL_DEV_NOTES.md

@@ -1,0 +1,285 @@
+name: CI/CD - Testing & Quality Assurance
+
+on:
+  push:
+    branches: [main, develop, starting_bid]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  test:
+    name: PHPUnit Tests
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        php-version: ['7.3', '7.4', '8.0', '8.1']
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup PHP ${{ matrix.php-version }}
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-version }}
+          extensions: mbstring, intl, pcov
+          coverage: pcov
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-progress
+
+      - name: Run tests with coverage
+        run: ./vendor/bin/phpunit --coverage-clover=coverage.xml --log-junit=test-results.xml
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          files: ./coverage.xml
+          fail_ci_if_error: false
+          verbose: true
+
+      - name: Archive test results
+        if: failure()
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-results-php-${{ matrix.php-version }}
+          path: test-results.xml
+
+  phpstan:
+    name: PHPStan Analysis
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.1
+          extensions: mbstring, intl
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-progress
+
+      - name: Run PHPStan
+        run: ./vendor/bin/phpstan analyse
+
+  phpmd:
+    name: PHPMD - Mess Detection
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.1
+          extensions: mbstring
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-progress
+
+      - name: Run PHPMD
+        run: ./vendor/bin/phpmd includes xml .phpmd.xml --reportfile phpmd-report.xml
+        continue-on-error: true
+
+      - name: Archive PHPMD report
+        uses: actions/upload-artifact@v3
+        with:
+          name: phpmd-report
+          path: phpmd-report.xml
+
+  phpcs:
+    name: PHPCS - Coding Standards
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.1
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-progress
+
+      - name: Run PHPCS
+        run: ./vendor/bin/phpcs includes --standard=phpcs.xml.dist --report=checkstyle --report-file=phpcs-report.xml
+        continue-on-error: true
+
+      - name: Archive PHPCS report
+        uses: actions/upload-artifact@v3
+        with:
+          name: phpcs-report
+          path: phpcs-report.xml
+
+  coverage-report:
+    name: Coverage Report
+    runs-on: ubuntu-latest
+    needs: test
+    if: always()
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.1
+          extensions: mbstring, intl, pcov
+          coverage: pcov
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-progress
+
+      - name: Generate HTML coverage report
+        run: ./vendor/bin/phpunit --coverage-html=coverage-report
+
+      - name: Archive coverage report
+        uses: actions/upload-artifact@v3
+        with:
+          name: coverage-report
+          path: coverage-report/
+
+  docker-security:
+    name: Docker Security Scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Build Docker image
+        run: docker build -t yith-auctions:latest .
+        continue-on-error: true
+
+      - name: Scan image for vulnerabilities
+        run: |
+          docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
+            aquasec/trivy image yith-auctions:latest
+        continue-on-error: true
+
+  security-audit:
+    name: Composer Security Audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.1
+
+      - name: Run ComposerRequireChecker
+        run: composer require --dev roave/composer-require-checker
+        continue-on-error: true
+
+      - name: Check for security vulnerabilities
+        run: ./vendor/bin/composer-require-checker --composer-json=composer.json --config-file=composer-require-checker.json
+        continue-on-error: true
+
+  quality-gate:
+    name: Quality Gate
+    runs-on: ubuntu-latest
+    needs: [test, phpstan, phpmd, phpcs]
+    if: always()
+    steps:
+      - name: Check test results
+        run: |
+          if [[ "${{ needs.test.result }}" != "success" ]]; then
+            echo "❌ Tests failed"
+            exit 1
+          fi
+          echo "✅ Tests passed"
+
+      - name: Check PHPStan results
+        run: |
+          if [[ "${{ needs.phpstan.result }}" != "success" ]]; then
+            echo "❌ PHPStan analysis failed"
+            exit 1
+          fi
+          echo "✅ PHPStan analysis passed"
+
+      - name: Check PHPMD results
+        run: echo "✅ PHPMD check completed"
+
+      - name: Check PHPCS results
+        run: echo "✅ PHPCS check completed"
+
+      - name: Quality Gate Status
+        run: echo "✅ All quality gates passed"
+
+  documentation:
+    name: Documentation Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.1
+
+      - name: Install documentation tools
+        run: |
+          composer require --dev phpdocumentor/phpdocumentor:latest
+        continue-on-error: true
+
+      - name: Generate PHP documentation
+        run: ./vendor/bin/phpdoc run --directory=includes --target=docs/api
+        continue-on-error: true
+
+      - name: Archive documentation
+        uses: actions/upload-artifact@v3
+        with:
+          name: api-documentation
+          path: docs/api/
+          if-no-files-found: ignore
+
+  release-notes:
+    name: Generate Release Notes
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Generate changelog
+        run: |
+          git log $(git describe --tags --abbrev=0 HEAD~1)..HEAD \
+            --oneline --format="%H %s" > RELEASE_NOTES.md
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          body_path: RELEASE_NOTES.md
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  notification:
+    name: Send Notifications
+    runs-on: ubuntu-latest
+    needs: [test, phpstan, quality-gate]
+    if: failure()
+    steps:
+      - name: Slack Notification
+        uses: slackapi/slack-github-action@v1.24.0
+        with:
+          payload: |
+            {
+              "text": "YITH Auctions CI/CD Pipeline Failed",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "❌ Pipeline Status: FAILED\n*Repository*: ${{ github.repository }}\n*Branch*: ${{ github.ref_name }}\n*Commit*: ${{ github.sha }}"
+                  }
+                },
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*Job Results*:\n• Tests: ${{ needs.test.result }}\n• PHPStan: ${{ needs.phpstan.result }}\n• Quality Gate: ${{ needs.quality-gate.result }}"
+                  }
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        if: always()

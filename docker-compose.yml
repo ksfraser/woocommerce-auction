@@ -1,0 +1,132 @@
+version: '3.8'
+
+services:
+  # MySQL Database
+  db:
+    image: mysql:8.0
+    container_name: yith-auctions-db
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-rootpassword}
+      MYSQL_DATABASE: ${DB_NAME:-yith_auctions}
+      MYSQL_USER: ${DB_USER:-auction_user}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-auction_password}
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./docker/mysql-init:/docker-entrypoint-initdb.d
+    networks:
+      - yith-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+
+  # WordPress with WooCommerce
+  wordpress:
+    image: wordpress:6.3-php8.1-fpm
+    container_name: yith-auctions-wordpress
+    environment:
+      WORDPRESS_DB_HOST: db:3306
+      WORDPRESS_DB_NAME: ${DB_NAME:-yith_auctions}
+      WORDPRESS_DB_USER: ${DB_USER:-auction_user}
+      WORDPRESS_DB_PASSWORD: ${DB_PASSWORD:-auction_password}
+      WORDPRESS_TABLE_PREFIX: wp_
+      WORDPRESS_DEBUG: 'true'
+      WORDPRESS_DEBUG_LOG: /var/www/html/wp-content/debug.log
+    ports:
+      - "9000:9000"
+    volumes:
+      - wordpress_data:/var/www/html
+      - ./:/var/www/html/wp-content/plugins/yith-auctions
+      - ./docker/php.ini:/usr/local/etc/php/php.ini
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - yith-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/wp-json/"]
+      timeout: 20s
+      retries: 10
+
+  # Nginx reverse proxy
+  nginx:
+    image: nginx:alpine
+    container_name: yith-auctions-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./docker/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./docker/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - wordpress_data:/var/www/html:ro
+    depends_on:
+      - wordpress
+    networks:
+      - yith-network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/"]
+      timeout: 10s
+      retries: 5
+
+  # Memcached for caching
+  memcached:
+    image: memcached:alpine
+    container_name: yith-auctions-cache
+    ports:
+      - "11211:11211"
+    networks:
+      - yith-network
+    healthcheck:
+      test: ["CMD", "echo", "stats", "|", "nc", "localhost", "11211"]
+      timeout: 5s
+      retries: 5
+
+  # Redis for session storage (optional)
+  redis:
+    image: redis:7-alpine
+    container_name: yith-auctions-redis
+    ports:
+      - "6379:6379"
+    networks:
+      - yith-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      timeout: 5s
+      retries: 5
+
+  # PHPMyAdmin for database management
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: yith-auctions-phpmyadmin
+    environment:
+      PMA_HOST: db
+      PMA_USER: ${DB_USER:-auction_user}
+      PMA_PASSWORD: ${DB_PASSWORD:-auction_password}
+    ports:
+      - "8080:80"
+    depends_on:
+      - db
+    networks:
+      - yith-network
+
+  # MailHog for email testing
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: yith-auctions-mailhog
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+    networks:
+      - yith-network
+
+volumes:
+  db_data:
+    driver: local
+  wordpress_data:
+    driver: local
+
+networks:
+  yith-network:
+    driver: bridge

@@ -1,0 +1,33 @@
+{
+  "checkMethod": true,
+  "checkUseStatements": true,
+  "checkNewStatements": true,
+  "checkInstanceof": true,
+  "checkStaticMethodCalls": true,
+  "checkFunctionCalls": true,
+  "checkClassConstants": true,
+  "checkClassNameStringCalls": true,
+  "allowedSymfonyComponents": [],
+  "allowedPhpExtensions": [
+    "Core",
+    "date",
+    "json",
+    "pcre",
+    "spl",
+    "standard",
+    "reflection",
+    "hash",
+    "filter",
+    "ctype",
+    "mbstring",
+    "mysqli",
+    "pdo",
+    "curl",
+    "openssl",
+    "gd",
+    "intl",
+    "zip",
+    "ftp",
+    "iconv"
+  ]
+}

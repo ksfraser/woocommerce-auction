@@ -1,0 +1,18 @@
+level: 5
+paths:
+  - includes/
+  - src/
+
+excludePaths:
+  - tests/
+  - vendor/
+  - plugin-fw/
+
+bootstrapFiles:
+  - tests/bootstrap.php
+
+typeAliases:
+  WC_Product: WC_Product
+
+reportUnmatchedIgnoredErrors: true
+treatPhpDocTypesAsCertain: true
