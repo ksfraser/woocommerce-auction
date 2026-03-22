@@ -1,5 +1,5 @@
 ---
-title: YITH_Auctions - Core Coordinator Documentation
+title: WcAuction_Coordinator - Core Coordinator Documentation
 component_path: includes/class.yith-wcact-auction.php
 version: 1.0
 date_created: 2026-03-22
@@ -7,7 +7,7 @@ last_updated: 2026-03-22
 tags: [component, core, coordinator, singleton, auction]
 ---
 
-# YITH_Auctions - Core Coordinator Documentation
+# WcAuction_Coordinator - Core Coordinator Documentation
 
 Core singleton coordinator responsible for plugin initialization, component management, and lifecycle orchestration. Serves as the entry point for all plugin functionality.
 
@@ -33,7 +33,7 @@ Core singleton coordinator responsible for plugin initialization, component mana
 - Individual component business logic
 - Database operations (delegated to repositories)
 - UI rendering (delegated to admin/frontend components)
-- Bid processing (delegated to YITH_WCACT_Bids)
+- Bid processing (delegated to WcAuction_Bids)
 
 ### System Context
 
@@ -51,7 +51,7 @@ Core singleton coordinator responsible for plugin initialization, component mana
 └──────────────────┬──────────────────────────┘
                    │
 ┌──────────────────▼──────────────────────────┐
-│    YITH_Auctions (THIS COMPONENT)           │
+│    WcAuction_Coordinator (THIS COMPONENT)   │
 │    Coordinates all auction system components│
 └──────────────────┬──────────────────────────┘
                    │

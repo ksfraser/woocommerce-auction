@@ -30,8 +30,8 @@ Custom WooCommerce product type managing auction-specific data, state queries, a
 - Current bid tracking
 
 **Excluded:**
-- Bid storage (delegated to YITH_WCACT_Bids)
-- AJAX handling (delegated to YITH_WCACT_Auction_Ajax)
+- Bid storage (delegated to WcAuction_Bids)
+- AJAX handling (delegated to WcAuction_Ajax)
 - UI rendering (delegated to frontend types)
 
 ---

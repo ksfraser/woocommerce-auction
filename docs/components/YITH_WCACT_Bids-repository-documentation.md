@@ -1,12 +1,12 @@
 ---
-title: YITH_WCACT_Bids - Data Repository Documentation
+title: WcAuction_Bids - Data Repository Documentation
 component_path: includes/class.yith-wcact-auction-bids.php
 version: 1.0
 date_created: 2026-03-22
 tags: [component, repository, data-access, persistence, auction]
 ---
 
-# YITH_WCACT_Bids - Data Repository Documentation
+# WcAuction_Bids - Data Repository Documentation
 
 Data access layer providing persistent bid storage, querying, and status management through the Active Record pattern.
 
@@ -30,7 +30,7 @@ Data access layer providing persistent bid storage, querying, and status managem
 - Index management
 
 **Excluded:**
-- Bid validation (delegated to YITH_WCACT_Auction_Ajax)
+- Bid validation (delegated to WcAuction_Ajax)
 - Business logic (delegated to product model)
 - UI rendering (delegated to frontend)
 
@@ -49,20 +49,20 @@ Data access layer providing persistent bid storage, querying, and status managem
 
 ```mermaid
 graph TD
-    YITH_WCACT_Bids["YITH_WCACT_Bids<br/>(Repository)"]
+    WcAuction_Bids["WcAuction_Bids<br/>(Repository)"]
     WordPress["WordPress<br/>($wpdb)"]
-    MySQL["MySQL Database<br/>(wp_yith_wcact_auction)"]
+    MySQL["MySQL Database<br/>(wp_wc_auction_bids)"]
     
-    YITH_WCACT_Bids -->|uses| WordPress
+    WcAuction_Bids -->|uses| WordPress
     WordPress -->|queries| MySQL
     
-    Frontend["Frontend<br/>(YITH_Auction_Frontend)"]
-    Ajax["AJAX Handler<br/>(YITH_WCACT_Auction_Ajax)"]
-    Completion["Completion Handler<br/>(YITH_WCACT_Finish_Auction)"]
+    Frontend["Frontend<br/>(WcAuction_Frontend)"]
+    Ajax["AJAX Handler<br/>(WcAuction_Ajax)"]
+    Completion["Completion Handler<br/>(WcAuction_FinishAuction)"]
     
-    Frontend -->|reads| YITH_WCACT_Bids
-    Ajax -->|writes| YITH_WCACT_Bids
-    Completion -->|updates| YITH_WCACT_Bids
+    Frontend -->|reads| WcAuction_Bids
+    Ajax -->|writes| WcAuction_Bids
+    Completion -->|updates| WcAuction_Bids
 ```
 
 ---
