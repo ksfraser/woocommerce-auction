@@ -1,4 +1,4 @@
-# Complete Requirements: YITH Auctions Auto-Bidding & Extensions
+# Complete Requirements: WooCommerce Auction Auto-Bidding & Extensions
 
 **Current Version**: 1.4.0  
 **Next Version**: 1.5.0  
@@ -64,14 +64,14 @@ This document consolidates ALL requirements across 5 feature areas:
 
 **Database Changes**:
 ```sql
-ALTER TABLE wp_yith_wcact_auction ADD COLUMN (
+ALTER TABLE wp_WcAuction_auction ADD COLUMN (
   is_sealed_bid TINYINT(1) DEFAULT 0,
   sealed_reveal_datetime DATETIME DEFAULT NULL,
   sealed_reveal_processed TINYINT(1) DEFAULT 0,
   sealed_max_bids_collected INT DEFAULT 0
 );
 
-CREATE TABLE wp_yith_wcact_sealed_bid_audit (
+CREATE TABLE wp_WcAuction_sealed_bid_audit (
   id INT AUTO_INCREMENT PRIMARY KEY,
   product_id INT,
   reveal_datetime DATETIME,
@@ -102,13 +102,13 @@ CREATE TABLE wp_yith_wcact_sealed_bid_audit (
 
 **Database Changes**:
 ```sql
-ALTER TABLE wp_yith_wcact_auction ADD COLUMN (
+ALTER TABLE wp_WcAuction_auction ADD COLUMN (
   entry_fee_enabled TINYINT(1) DEFAULT 0,
   entry_fee_amount DECIMAL(10,2) DEFAULT NULL,
   entry_fee_description VARCHAR(500) DEFAULT NULL
 );
 
-CREATE TABLE wp_yith_wcact_entry_fees (
+CREATE TABLE wp_WcAuction_entry_fees (
   id INT AUTO_INCREMENT PRIMARY KEY,
   product_id INT,
   user_id INT,
@@ -174,7 +174,7 @@ CREATE TABLE wp_yith_wcact_entry_fees (
 
 **Database Changes**:
 ```sql
-CREATE TABLE wp_yith_wcact_post_auction_log (
+CREATE TABLE wp_WcAuction_post_auction_log (
   id INT AUTO_INCREMENT PRIMARY KEY,
   product_id INT,
   auction_winner_id INT,
@@ -191,7 +191,7 @@ CREATE TABLE wp_yith_wcact_post_auction_log (
   created_at DATETIME DEFAULT NOW()
 );
 
-ALTER TABLE wp_yith_wcact_auction ADD COLUMN (
+ALTER TABLE wp_WcAuction_auction ADD COLUMN (
   order_id INT DEFAULT NULL,
   payment_status ENUM('pending', 'paid', 'failed', 'unpaid') DEFAULT 'pending'
 );
@@ -297,17 +297,17 @@ Commission NOT applied (that's for winning auction only)
 
 | Table | Purpose |
 |-------|---------|
-| `wp_yith_wcact_entry_fees` | Track entry fee payments & refunds |
-| `wp_yith_wcact_sealed_bid_audit` | Audit sealed bid reveal processing |
-| `wp_yith_wcact_post_auction_log` | Track post-auction order generation, payment attempts |
+| `wp_WcAuction_entry_fees` | Track entry fee payments & refunds |
+| `wp_WcAuction_sealed_bid_audit` | Audit sealed bid reveal processing |
+| `wp_WcAuction_post_auction_log` | Track post-auction order generation, payment attempts |
 
 ### Modified Tables
 
 | Table | Columns Added | Purpose |
 |-------|---|---|
-| `wp_yith_wcact_auction` | `entry_fee_enabled`, `entry_fee_amount`, `entry_fee_description` | Entry fee configuration |
-| `wp_yith_wcact_auction` | `is_sealed_bid`, `sealed_reveal_datetime`, `sealed_reveal_processed`, `sealed_max_bids_collected` | Sealed bid config & status |
-| `wp_yith_wcact_auction` | `order_id`, `payment_status` | Post-auction order linkage |
+| `wp_WcAuction_auction` | `entry_fee_enabled`, `entry_fee_amount`, `entry_fee_description` | Entry fee configuration |
+| `wp_WcAuction_auction` | `is_sealed_bid`, `sealed_reveal_datetime`, `sealed_reveal_processed`, `sealed_max_bids_collected` | Sealed bid config & status |
+| `wp_WcAuction_auction` | `order_id`, `payment_status` | Post-auction order linkage |
 
 ---
 

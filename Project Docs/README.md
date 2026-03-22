@@ -1,6 +1,6 @@
 # Project Documentation
 
-BABOK-based project documentation for YITH Auctions for WooCommerce.
+BABOK-based project documentation for WooCommerce Auction.
 
 ## Document Index
 

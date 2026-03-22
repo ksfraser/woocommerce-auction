@@ -96,12 +96,12 @@ YITH_Auctions
 
 **Internal Dependencies:**
 - `WC_Product_Auction` - Custom product type registration
-- `YITH_WCACT_Bids` - Bid repository access
-- `YITH_WCACT_Bid_Increment` - Increment management
-- `YITH_WCACT_Auction_Ajax` - AJAX handler
+- `WcAuction_Bids` - Bid repository access
+- `WcAuction_BidIncrement` - Increment management
+- `WcAuction_Auction_Ajax` - AJAX handler
 - `YITH_Auction_Admin` - Admin interface
 - `YITH_Auction_Frontend` - Frontend rendering
-- `YITH_WCACT_Finish_Auction` - Auction completion handler
+- `WcAuction_Finish_Auction` - Auction completion handler
 
 **External Dependencies:**
 - `WooCommerce` - Product types, WC_Product base class
@@ -123,10 +123,10 @@ graph LR
     
     subgraph "Components"
         Product["WC_Product_<br/>Auction"]
-        Bids["YITH_WCACT_<br/>Bids"]
+        Bids["WcAuction_<br/>Bids"]
         Admin["YITH_Auction_<br/>Admin"]
         Frontend["YITH_Auction_<br/>Frontend"]
-        Ajax["YITH_WCACT_<br/>Auction_Ajax"]
+        Ajax["WcAuction_<br/>Auction_Ajax"]
     end
     
     WP -->|plugins_loaded| Singleton
@@ -159,7 +159,7 @@ graph LR
 ### Hook Integration Points
 
 **Actions Fired:**
-- `yith_wcact_init` - After all components initialized
+- `WcAuction_init` - After all components initialized
 
 **Hooks Registered:**
 - `plugins_loaded` → `on_plugins_loaded()`
@@ -193,12 +193,12 @@ public function on_plugins_loaded() {
     $this->init_components();
     
     // 6. Do action for extensions
-    do_action('yith_wcact_init');
+    do_action('WcAuction_init');
 }
 
 // 7. Components initialize themselves on instantiation
 $product_type = new WC_Product_Auction();  // Registers with WC
-$bids_repo = YITH_WCACT_Bids::get_instance();  // Prepares schema
+$bids_repo = WcAuction_Bids::get_instance();  // Prepares schema
 ```
 
 ### Component Instantiation Pattern
@@ -208,8 +208,8 @@ Each component follows singleton pattern:
 ```php
 // In YITH_Auctions::init_components()
 $this->components[] = WC_Product_Auction::get_instance();
-$this->components[] = YITH_WCACT_Bids::get_instance();
-$this->components[] = YITH_WCACT_Auction_Ajax::get_instance();
+$this->components[] = WcAuction_Bids::get_instance();
+$this->components[] = WcAuction_Auction_Ajax::get_instance();
 // ... etc
 ```
 
@@ -223,20 +223,20 @@ Each component:
 
 ```php
 public function admin_print_styles() {
-    wp_enqueue_style('yith-wcact-admin', YITH_WCACT_URL . 'assets/css/admin.css');
-    wp_enqueue_script('yith-wcact-admin', YITH_WCACT_URL . 'assets/js/admin.js');
-    wp_localize_script('yith-wcact-admin', 'yith_wcact_data', [
+    wp_enqueue_style('yith-wcact-admin', WcAuction_URL . 'assets/css/admin.css');
+    wp_enqueue_script('yith-wcact-admin', WcAuction_URL . 'assets/js/admin.js');
+    wp_localize_script('yith-wcact-admin', 'WcAuction_data', [
         'ajax_url' => admin_url('admin-ajax.php'),
-        'nonce' => wp_create_nonce('yith_wcact_admin')
+        'nonce' => wp_create_nonce('WcAuction_admin')
     ]);
 }
 
 public function frontend_print_styles() {
     // Only enqueue on shop/product pages
     if (is_shop() || is_product_taxonomy() || is_product()) {
-        wp_enqueue_style('yith-wcact-shop', YITH_WCACT_URL . 'assets/css/frontend.css');
-        wp_enqueue_script('jquery-timepicker', YITH_WCACT_URL . 'assets/js/timepicker.js');
-        wp_enqueue_script('yith-wcact-shop', YITH_WCACT_URL . 'assets/js/frontend_shop.js');
+        wp_enqueue_style('yith-wcact-shop', WcAuction_URL . 'assets/css/frontend.css');
+        wp_enqueue_script('jquery-timepicker', WcAuction_URL . 'assets/js/timepicker.js');
+        wp_enqueue_script('yith-wcact-shop', WcAuction_URL . 'assets/js/frontend_shop.js');
     }
 }
 ```
@@ -245,12 +245,12 @@ public function frontend_print_styles() {
 
 **Plugin Constants (init.php):**
 ```php
-define('YITH_WCACT_INIT', true);
-define('YITH_WCACT_VERSION', '1.2.4');
-define('YITH_WCACT_FILE', __FILE__);
-define('YITH_WCACT_DIR', dirname(__FILE__));
-define('YITH_WCACT_URL', plugins_url('/', __FILE__));
-define('YITH_WCACT_INCLUDES', YITH_WCACT_DIR . '/includes/');
+define('WcAuction_INIT', true);
+define('WcAuction_VERSION', '1.2.4');
+define('WcAuction_FILE', __FILE__);
+define('WcAuction_DIR', dirname(__FILE__));
+define('WcAuction_URL', plugins_url('/', __FILE__));
+define('WcAuction_INCLUDES', WcAuction_DIR . '/includes/');
 ```
 
 **Dependency Checks:**
@@ -310,7 +310,7 @@ Each component accesses coordinator via:
 $coordinator = YITH_Auctions::get_instance();
 
 // Access other components
-$bids_repo = YITH_WCACT_Bids::get_instance();
+$bids_repo = WcAuction_Bids::get_instance();
 ```
 
 ---
@@ -355,7 +355,7 @@ try {
     $component = new $class_name();
     $this->components[] = $component;
 } catch (Exception $e) {
-    error_log('YITH Auctions: Failed to initialize ' . $class_name);
+    error_log('WooCommerce Auction: Failed to initialize ' . $class_name);
     error_log($e->getMessage());
 }
 ```
@@ -412,12 +412,12 @@ public function test_admin_assets_enqueued_in_admin() {
 
 ### How to Extend Initialization
 
-Use the `yith_wcact_init` action:
+Use the `WcAuction_init` action:
 
 ```php
 // In extension plugin
-add_action('yith_wcact_init', function() {
-    // All YITH Auctions components initialized
+add_action('WcAuction_init', function() {
+    // All WooCommerce Auction components initialized
     // Safe to access any component
 });
 ```
@@ -427,10 +427,10 @@ add_action('yith_wcact_init', function() {
 Enable debug logging:
 ```php
 // In wp-config.php
-define('YITH_WCACT_DEBUG', true);
+define('WcAuction_DEBUG', true);
 
 // In class
-if (defined('YITH_WCACT_DEBUG') && YITH_WCACT_DEBUG) {
+if (defined('WcAuction_DEBUG') && WcAuction_DEBUG) {
     error_log('Component state: ' . print_r($this->components, true));
 }
 ```

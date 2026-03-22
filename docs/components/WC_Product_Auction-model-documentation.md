@@ -53,15 +53,15 @@ graph TD
     WC_Product_Auction["WC_Product_Auction<br/>(Custom Type)"]
     WC_Product --> WC_Product_Auction
     
-    WC_Product_Auction -->|uses| YITH_WCACT_Bids["YITH_WCACT_Bids<br/>(Repository)"]
-    WC_Product_Auction -->|uses| YITH_WCACT_Bid_Increment["YITH_WCACT_Bid_Increment<br/>(Increment Logic)"]
+    WC_Product_Auction -->|uses| WcAuction_Bids["WcAuction_Bids<br/>(Repository)"]
+    WC_Product_Auction -->|uses| WcAuction_BidIncrement["WcAuction_BidIncrement<br/>(Increment Logic)"]
 ```
 
 ### Dependencies
 
 **Internal:**
-- `YITH_WCACT_Bids` - Repository for bid records
-- `YITH_WCACT_Bid_Increment` - Increment calculation logic
+- `WcAuction_Bids` - Repository for bid records
+- `WcAuction_BidIncrement` - Increment calculation logic
 
 **External:**
 - `WC_Product` - Base class from WooCommerce
@@ -172,7 +172,7 @@ public function validate_auction_dates() {
 ```php
 public function get_auction_increment_value($current_bid) {
     // Get increment rules for this product
-    $ranges = YITH_WCACT_Bid_Increment::get_instance()
+    $ranges = WcAuction_BidIncrement::get_instance()
         ->get_increments_by_product($this->get_id());
     
     // Find applicable range
@@ -197,12 +197,12 @@ $next_min = $current_bid + $increment;  // 155.00
 
 ```php
 public function get_current_highest_bid() {
-    $bids_repo = YITH_WCACT_Bids::get_instance();
+    $bids_repo = WcAuction_Bids::get_instance();
     return $bids_repo->get_highest_bid($this->get_id());
 }
 
 public function get_current_winner() {
-    $bids_repo = YITH_WCACT_Bids::get_instance();
+    $bids_repo = WcAuction_Bids::get_instance();
     $bid = $bids_repo->get_winning_bid($this->get_id());
     return $bid ? $bid['user_id'] : null;
 }

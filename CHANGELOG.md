@@ -44,7 +44,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Component documentation (3 files with C4/Arc42 patterns)
   - YITH_Auctions-coordinator-documentation.md
   - WC_Product_Auction-model-documentation.md
-  - YITH_WCACT_Bids-repository-documentation.md
+  - WcAuction_Bids-repository-documentation.md
 - Comprehensive README.md with features and installation
 - Quality assurance infrastructure
 
@@ -216,7 +216,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.0.0] - 2023-06-01
 
 ### Added
-- Initial release of YITH Auctions for WooCommerce
+- Initial release of WooCommerce Auction
 - Core auction functionality
 - Real-time bidding support
 - Auction product type

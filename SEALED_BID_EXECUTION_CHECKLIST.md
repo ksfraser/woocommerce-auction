@@ -39,9 +39,9 @@
 ### TASK-0.1: Add Sealed Bid Metabox Section
 - [ ] Identify product metabox location: `panel/product-auction-settings.php` or custom
 - [ ] Create new settings section: "Sealed Bid Settings"
-- [ ] Add checkbox: `<input type="checkbox" name="yith_wcact_is_sealed_bid">`
+- [ ] Add checkbox: `<input type="checkbox" name="WcAuction_is_sealed_bid">`
 - [ ] Default: unchecked
-- [ ] Store in: `_yith_wcact_is_sealed_bid` post meta
+- [ ] Store in: `_WcAuction_is_sealed_bid` post meta
 - [ ] Validation: disable if auction already started
 - **Acceptance**:
   - [ ] Metabox section renders in product edit page
@@ -50,9 +50,9 @@
   - [ ] No PHP errors
 
 ### TASK-0.2: Add Reveal Date/Time Pickers
-- [ ] Add datepicker input: `<input type="date" name="yith_wcact_sealed_reveal_date">`
-- [ ] Add timepicker input: `<input type="time" name="yith_wcact_sealed_reveal_time">`
-- [ ] Combine and store in: `_yith_wcact_sealed_reveal_date`, `_yith_wcact_sealed_reveal_time`
+- [ ] Add datepicker input: `<input type="date" name="WcAuction_sealed_reveal_date">`
+- [ ] Add timepicker input: `<input type="time" name="WcAuction_sealed_reveal_time">`
+- [ ] Combine and store in: `_WcAuction_sealed_reveal_date`, `_WcAuction_sealed_reveal_time`
 - [ ] Add validation message: "Reveal time must be after now and before auction end"
 - [ ] Show on page only if checkbox enabled (JS toggle)
 - [ ] Convert user timezone to UTC for storage
@@ -94,7 +94,7 @@
   ```php
   function add_sealed_bid_columns() {
     // Check if columns exist before adding
-    // ALTER TABLE wp_yith_wcact_auction ADD COLUMN:
+    // ALTER TABLE wp_WcAuction_auction ADD COLUMN:
     //   - is_sealed_bid TINYINT(1) DEFAULT 0
     //   - sealed_reveal_datetime DATETIME DEFAULT NULL
     //   - sealed_reveal_processed TINYINT(1) DEFAULT 0
@@ -105,16 +105,16 @@
 - [ ] Increment DB version to 1.3.0
 - [ ] Test: run twice to verify idempotent (no duplicate column error)
 - **Acceptance**:
-  - [ ] Columns added to wp_yith_wcact_auction
+  - [ ] Columns added to wp_WcAuction_auction
   - [ ] Migration runs without error
   - [ ] idempotent check prevents duplicate adds
   - [ ] DB version updated
 
 ### TASK-1B.2: Create Sealed Bid Audit Log Table
-- [ ] Create new table: `wp_yith_wcact_sealed_bid_audit`
+- [ ] Create new table: `wp_WcAuction_sealed_bid_audit`
 - [ ] Schema:
   ```sql
-  CREATE TABLE wp_yith_wcact_sealed_bid_audit (
+  CREATE TABLE wp_WcAuction_sealed_bid_audit (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
     product_id BIGINT NOT NULL,
     reveal_datetime DATETIME NOT NULL,
@@ -171,7 +171,7 @@
 - [ ] Flow:
   - BEGIN TRANSACTION
   - Call process_auto_bids_retroactive($product_id)
-  - UPDATE wp_yith_wcact_auction
+  - UPDATE wp_WcAuction_auction
     - Set sealed_reveal_processed = 1
     - Set sealed_max_bids_collected = count($max_bids)
   - COMMIT on success
@@ -196,7 +196,7 @@
 
 ### TASK-4B.1: Check Sealed Period in Bid Handler
 - [ ] Edit `includes/class.yith-wcact-auction-ajax.php`
-- [ ] In `yith_wcact_add_bid()` after bid validation:
+- [ ] In `WcAuction_add_bid()` after bid validation:
   - Check if product is_sealed_bid = 1
   - Check if sealed_reveal_processed = 0
   - Check if NOW < sealed_reveal_datetime
@@ -221,7 +221,7 @@
   - [ ] No auto-bids placed during sealed period
 
 ### TASK-4B.2: Update AJAX Response Structure
-- [ ] Modify response JSON in `yith_wcact_add_bid()`:
+- [ ] Modify response JSON in `WcAuction_add_bid()`:
   ```json
   {
     "success": true/false,
@@ -252,8 +252,8 @@
 - [ ] Edit `templates/woocommerce/single-product/add-to-cart/auction.php`
 - [ ] Add sealed check at top:
   ```php
-  $is_sealed = (get_post_meta($product_id, '_yith_wcact_is_sealed_bid', true) == 1);
-  $seal_reveal = get_post_meta($product_id, '_yith_wcact_sealed_reveal_datetime', true);
+  $is_sealed = (get_post_meta($product_id, '_WcAuction_is_sealed_bid', true) == 1);
+  $seal_reveal = get_post_meta($product_id, '_WcAuction_sealed_reveal_datetime', true);
   $is_revealed = (time() > strtotime($seal_reveal));
   ```
 - [ ] If $is_sealed && !$is_revealed:
@@ -342,8 +342,8 @@
 - [ ] Edit `includes/class.yith-wcact-auction.php`
 - [ ] On plugin activation (or init):
   ```php
-  if (!wp_next_scheduled('yith_wcact_sealed_bid_reveal')) {
-    wp_schedule_event(time(), 'five_minutes', 'yith_wcact_sealed_bid_reveal');
+  if (!wp_next_scheduled('WcAuction_sealed_bid_reveal')) {
+    wp_schedule_event(time(), 'five_minutes', 'WcAuction_sealed_bid_reveal');
   }
   ```
 - [ ] Add function to handle the hook
@@ -361,7 +361,7 @@
 - [ ] Create method: `handle_sealed_bid_reveal()`
 - [ ] Query all auctions:
   ```sql
-  SELECT product_id FROM wp_yith_wcact_auction 
+  SELECT product_id FROM wp_WcAuction_auction 
   WHERE is_sealed_bid=1 AND sealed_reveal_processed=0 
   AND sealed_reveal_datetime <= UTC_TIMESTAMP()
   ```
@@ -383,9 +383,9 @@
 
 ### TASK-8.3: Create Audit Trail on Reveal
 - [ ] In `process_sealed_reveal_transactional()` or `handle_sealed_bid_reveal()`
-- [ ] After successful reveal: insert into wp_yith_wcact_sealed_bid_audit
+- [ ] After successful reveal: insert into wp_WcAuction_sealed_bid_audit
   ```php
-  $wpdb->insert('wp_yith_wcact_sealed_bid_audit', [
+  $wpdb->insert('wp_WcAuction_sealed_bid_audit', [
     'product_id' => $product_id,
     'reveal_datetime' => $seal_reveal,
     'auto_bids_count' => count($auto_bids),

@@ -1,16 +1,16 @@
 ---
-title: YITH Auctions for WooCommerce - Architecture Blueprint
+title: WooCommerce Auction - Architecture Blueprint
 version: 1.0
 date_created: 2026-03-22
 last_updated: 2026-03-22
 tags: [architecture, wordpress, woocommerce, auction]
 ---
 
-# YITH Auctions for WooCommerce - Architecture Blueprint
+# WooCommerce Auction - Architecture Blueprint
 
 ## Executive Summary
 
-YITH Auctions for WooCommerce is a **modular, plugin-based auction system** built on WordPress and WooCommerce. The architecture follows **component-based design patterns** with clear separation of concerns, enabling extensibility through hooks, filters, and custom class overrides.
+WooCommerce Auction is a **modular, plugin-based auction system** built on WordPress and WooCommerce. The architecture follows **component-based design patterns** with clear separation of concerns, enabling extensibility through hooks, filters, and custom class overrides.
 
 **Technology Stack:**
 - PHP 7.3+ | WordPress 4.0+ | WooCommerce 3.0+
@@ -107,7 +107,7 @@ $auction = YITH_Auctions::get_instance();
 - `is_auction_ended()` - Check if auction closed
 - `get_auction_increment_value()` - Calculate next valid bid
 
-### 2.3 Data Access Layer: `YITH_WCACT_Bids`
+### 2.3 Data Access Layer: `WcAuction_Bids`
 
 **File:** `includes/class.yith-wcact-auction-bids.php`
 
@@ -119,7 +119,7 @@ $auction = YITH_Auctions::get_instance();
 - Manage bid status (pending, winner, outbid)
 - Bid validation
 
-**Database Table:** `wp_yith_wcact_auction`
+**Database Table:** `wp_WcAuction_auction`
 
 **Key Methods:**
 - `add_bid($auction_id, $user_id, $bid_amount)` - Create bid record
@@ -130,7 +130,7 @@ $auction = YITH_Auctions::get_instance();
 
 **Design Pattern:** Active Record (repository with DB access)
 
-### 2.4 Business Logic: `YITH_WCACT_Bid_Increment`
+### 2.4 Business Logic: `WcAuction_BidIncrement`
 
 **File:** `includes/class.yith-wcact-auction-bid-increment.php`
 
@@ -141,7 +141,7 @@ $auction = YITH_Auctions::get_instance();
 - Calculate valid next bids
 - Support global and per-product overrides
 
-**Database Table:** `wp_yith_wcact_bid_increment`
+**Database Table:** `wp_WcAuction_BidIncrement`
 
 **Key Methods:**
 - `get_increment_for_value($price, $product_id)` - Calculate increment for price point
@@ -158,14 +158,14 @@ $auction = YITH_Auctions::get_instance();
 ]
 ```
 
-### 2.5 AJAX Endpoint: `YITH_WCACT_Auction_Ajax`
+### 2.5 AJAX Endpoint: `WcAuction_Auction_Ajax`
 
 **File:** `includes/class.yith-wcact-auction-ajax.php`
 
 **Purpose:** Handle real-time bid submissions via AJAX
 
 **Endpoints:**
-- `wp-admin/admin-ajax.php?action=yith_wcact_submit_bid`
+- `wp-admin/admin-ajax.php?action=WcAuction_submit_bid`
 
 **Responsibilities:**
 - Validate bid requests
@@ -181,7 +181,7 @@ $auction = YITH_Auctions::get_instance();
 **Request Payload:**
 ```json
 {
-    "action": "yith_wcact_submit_bid",
+    "action": "WcAuction_submit_bid",
     "auction_id": 123,
     "bid_amount": 150.00,
     "nonce": "verification_token"
@@ -236,7 +236,7 @@ class YITH_Auction_Admin_Premium extends YITH_Auction_Admin {
 
 **Templates:** `templates/frontend/`
 
-### 2.8 Auction Completion: `YITH_WCACT_Finish_Auction`
+### 2.8 Auction Completion: `WcAuction_Finish_Auction`
 
 **File:** `includes/class.yith-wcact-auction-finish-auction.php`
 
@@ -265,12 +265,12 @@ class YITH_Auction_Admin_Premium extends YITH_Auction_Admin {
 
 ### 3.1 Database Schema
 
-**Table: `wp_yith_wcact_auction`**
+**Table: `wp_WcAuction_auction`**
 
 Persists individual bid records:
 
 ```sql
-CREATE TABLE wp_yith_wcact_auction (
+CREATE TABLE wp_WcAuction_auction (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
     auction_id BIGINT NOT NULL,          -- Product ID
     user_id BIGINT NOT NULL,             -- WordPress user ID
@@ -285,12 +285,12 @@ CREATE TABLE wp_yith_wcact_auction (
 - `(user_id, timestamp DESC)` - Query user's bid history
 - `(auction_id, bid DESC)` - Find highest bid
 
-**Table: `wp_yith_wcact_bid_increment`**
+**Table: `wp_WcAuction_BidIncrement`**
 
 Defines increment ranges:
 
 ```sql
-CREATE TABLE wp_yith_wcact_bid_increment (
+CREATE TABLE wp_WcAuction_BidIncrement (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
     product_id BIGINT NOT NULL,          -- Product ID (0 = global)
     from_price DECIMAL(10,2) NOT NULL,   -- Range start
@@ -343,9 +343,9 @@ $wins = $bids_repo->get_user_bids($user_id, 'winner');
 **Exception Hierarchy:**
 ```php
 // Custom exceptions for specific error conditions
-class YITH_WCACT_Bid_Invalid_Exception extends Exception {}
-class YITH_WCACT_Auction_Not_Found_Exception extends Exception {}
-class YITH_WCACT_Auction_Not_Active_Exception extends Exception {}
+class WcAuction_Bid_Invalid_Exception extends Exception {}
+class WcAuction_Auction_Not_Found_Exception extends Exception {}
+class WcAuction_Auction_Not_Active_Exception extends Exception {}
 ```
 
 ### 4.2 Logging
@@ -354,7 +354,7 @@ Structured logging for audit trails:
 
 ```php
 // Log bid submissions
-do_action('yith_wcact_log_bid_submission', [
+do_action('WcAuction_log_bid_submission', [
     'auction_id' => $auction_id,
     'user_id' => $user_id,
     'bid_amount' => $bid,
@@ -388,8 +388,8 @@ Premium features extend base classes:
 
 ```php
 // Premium variant registration
-if (class_exists('YITH_WCACT_Auction_Admin_Premium')) {
-    $admin = YITH_WCACT_Auction_Admin_Premium::get_instance();
+if (class_exists('WcAuction_Auction_Admin_Premium')) {
+    $admin = WcAuction_Auction_Admin_Premium::get_instance();
 } else {
     $admin = YITH_Auction_Admin::get_instance();
 }
@@ -401,16 +401,16 @@ if (class_exists('YITH_WCACT_Auction_Admin_Premium')) {
 
 ```php
 // Plugin initialization
-do_action('yith_wcact_init');
+do_action('WcAuction_init');
 
 // Before processing bid
-do_action('yith_wcact_auction_before_set_bid', $auction_id, $user_id, $bid);
+do_action('WcAuction_auction_before_set_bid', $auction_id, $user_id, $bid);
 
 // After bid accepted
-do_action('yith_wcact_auction_bid_assigned', $auction_id, $user_id, $bid, $bid_id);
+do_action('WcAuction_auction_bid_assigned', $auction_id, $user_id, $bid, $bid_id);
 
 // Auction completion
-do_action('yith_wcact_auction_finished', $auction_id, $winner_id);
+do_action('WcAuction_auction_finished', $auction_id, $winner_id);
 ```
 
 ### 5.3 Filter Hooks
@@ -419,13 +419,13 @@ do_action('yith_wcact_auction_finished', $auction_id, $winner_id);
 
 ```php
 // Modify current bid calculation
-$current_bid = apply_filters('yith_wcact_get_current_bid', $bid, $auction_id);
+$current_bid = apply_filters('WcAuction_get_current_bid', $bid, $auction_id);
 
 // Extend settings options
-$options = apply_filters('yith_wcact_settings_options', $options);
+$options = apply_filters('WcAuction_settings_options', $options);
 
 // Override class loading
-apply_filters('yith_wcact_require_class', $class_path, $class_name);
+apply_filters('WcAuction_require_class', $class_path, $class_name);
 ```
 
 ---
@@ -514,8 +514,8 @@ register_activation_hook(__FILE__, [$this, 'on_activation']);
 // Creates database tables
 public function on_activation() {
     global $wpdb;
-    $wpdb->query("CREATE TABLE IF NOT EXISTS {$wpdb->prefix}yith_wcact_auction ...");
-    $wpdb->query("CREATE TABLE IF NOT EXISTS {$wpdb->prefix}yith_wcact_bid_increment ...");
+    $wpdb->query("CREATE TABLE IF NOT EXISTS {$wpdb->prefix}WcAuction_auction ...");
+    $wpdb->query("CREATE TABLE IF NOT EXISTS {$wpdb->prefix}WcAuction_BidIncrement ...");
 }
 ```
 
@@ -566,7 +566,7 @@ class My_Custom_Auction_Frontend extends YITH_Auction_Frontend {
 
 **Pattern 2: Use Hooks**
 ```php
-add_action('yith_wcact_auction_bid_assigned', function($auction_id, $user_id, $bid) {
+add_action('WcAuction_auction_bid_assigned', function($auction_id, $user_id, $bid) {
     // Custom logic when bid accepted
     notify_user_via_custom_channel($user_id, $bid);
 });
@@ -575,9 +575,9 @@ add_action('yith_wcact_auction_bid_assigned', function($auction_id, $user_id, $b
 **Pattern 3: Create Add-On Plugin**
 ```php
 // In separate plugin file
-if (defined('YITH_WCACT_INIT')) {
-    // YITH Auctions is active, extend it
-    add_filter('yith_wcact_settings_options', 'add_custom_settings');
+if (defined('WcAuction_INIT')) {
+    // WooCommerce Auction is active, extend it
+    add_filter('WcAuction_settings_options', 'add_custom_settings');
 }
 ```
 
@@ -587,12 +587,12 @@ Premium features use class variant detection:
 
 ```php
 // In base class
-if (class_exists('YITH_WCACT_Auction_Admin_Premium')) {
-    return YITH_WCACT_Auction_Admin_Premium::get_instance();
+if (class_exists('WcAuction_Auction_Admin_Premium')) {
+    return WcAuction_Auction_Admin_Premium::get_instance();
 }
 ```
 
-Premium plugin defines `YITH_WCACT_Auction_Admin_Premium` to override functionality.
+Premium plugin defines `WcAuction_Auction_Admin_Premium` to override functionality.
 
 ---
 
@@ -640,17 +640,17 @@ Premium plugin defines `YITH_WCACT_Auction_Admin_Premium` to override functional
 
 1. **Auto-Bidding System** (v1.4)
    - Progressive proxy bidding
-   - New `YITH_WCACT_AutoBidder` component
-   - Extends `YITH_WCACT_Bids` repository
+   - New `WcAuction_AutoBidder` component
+   - Extends `WcAuction_Bids` repository
 
 2. **Sealed Bid Auctions** (v1.5)
    - Blind bidding with retroactive reveal
-   - New `YITH_WCACT_SealedBidHandler` component
+   - New `WcAuction_SealedBidHandler` component
    - Enhanced `WC_Product_Auction_Sealed` product variant
 
 3. **Entry Fees & Commission** (v1.4)
    - Fee calculations
-   - New `YITH_WCACT_FeeCalculator` service
+   - New `WcAuction_FeeCalculator` service
    - Commission model strategy pattern
 
 ### Architectural Principles for Extensions

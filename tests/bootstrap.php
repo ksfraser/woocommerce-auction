@@ -5,7 +5,7 @@
  * Provides stubs for WordPress functions and WooCommerce classes
  * so unit tests can run without a full WordPress environment.
  *
- * @package YITH\Auctions\Tests
+ * @package WC\\Auction\\Tests
  */
 
 // Composer autoloader
@@ -16,12 +16,12 @@ if ( ! defined( 'ABSPATH' ) ) {
     define( 'ABSPATH', __DIR__ . '/../' );
 }
 
-if ( ! defined( 'YITH_WCACT_VERSION' ) ) {
-    define( 'YITH_WCACT_VERSION', '1.2.4' );
+if ( ! defined( 'WcAuction_VERSION' ) ) {
+    define( 'WcAuction_VERSION', '1.2.4' );
 }
 
-if ( ! defined( 'YITH_WCACT_PATH' ) ) {
-    define( 'YITH_WCACT_PATH', dirname( __DIR__ ) . '/' );
+if ( ! defined( 'WcAuction_PATH' ) ) {
+    define( 'WcAuction_PATH', dirname( __DIR__ ) . '/' );
 }
 
 // Stub WordPress global $wpdb

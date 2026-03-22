@@ -1,4 +1,4 @@
-# YITH Auctions: Complete Auto-Bidding Vision
+# WooCommerce Auction: Complete Auto-Bidding Vision
 
 **Document**: Overall roadmap for auto-bidding feature (v1.0 + v1.1)  
 **Versions Covered**: 1.4.0 (Auto-Bidding) → 1.5.0 (Sealed Bids)  
@@ -64,8 +64,8 @@ Auction ends with A at $41 ✓
 **Deliverables**:
 - ✓ `/plan/feature-auto-bidding-1.md` - Complete implementation plan
 - ✓ `/EXECUTION_CHECKLIST.md` - Task breakdown with checkboxes
-- ✓ `YITH_WCACT_Auto_Bid` class with algorithm
-- ✓ Database: `wp_yith_wcact_user_max_bids` table
+- ✓ `WcAuction_Auto_Bid` class with algorithm
+- ✓ Database: `wp_WcAuction_user_max_bids` table
 - ✓ 24 unit tests + full test coverage
 - Documentation and changelog
 
@@ -114,7 +114,7 @@ NOBODY KNOWS WHO'S BIDDING OR HOW MUCH ANYONE HAS BID ✓
 AT REVEAL TIME (2026-03-25 4:30 PM UTC)
 ──────────────────────────────────────
 
-System cron fires: yith_wcact_sealed_bid_reveal
+System cron fires: WcAuction_sealed_bid_reveal
 → Processes all 3 max bids retroactively:
   1. Start with highest max: C ($950)
   2. Check B ($800) < $950 → No auto-bid needed
@@ -152,7 +152,7 @@ Winner: User A at $951
 **Deliverables**:
 - ✓ `/plan/feature-auto-bidding-sealed-bids-1.1.md` - Complete sealed bid plan
 - ✓ `/SEALED_BID_EXECUTION_CHECKLIST.md` - Task breakdown with checkboxes
-- Extended `YITH_WCACT_Auto_Bid` with retroactive processing
+- Extended `WcAuction_Auto_Bid` with retroactive processing
 - New: WordPress cron for scheduled reveals
 - Database: 4 new columns + audit table
 - 40+ new tests (sealed config, retroactive algorithms, display, integration)
@@ -184,14 +184,14 @@ Winner: User A at $951
 
 ### New Tables
 
-**`wp_yith_wcact_user_max_bids`** (v1.0)
+**`wp_WcAuction_user_max_bids`** (v1.0)
 ```
 id, user_id, product_id, max_bid, current_proxy_bid, 
 created_at, updated_at
 ```
 Stores each user's maximum bid per auction.
 
-**`wp_yith_wcact_sealed_bid_audit`** (v1.1)
+**`wp_WcAuction_sealed_bid_audit`** (v1.1)
 ```
 id, product_id, reveal_datetime, auto_bids_count, 
 final_bid_amount, processed_at, status, error_message
@@ -200,7 +200,7 @@ Audit log of all sealed bid reveals (for debugging + compliance).
 
 ### Extended Tables
 
-**`wp_yith_wcact_auction`** (Existing table, columns added in phases)
+**`wp_WcAuction_auction`** (Existing table, columns added in phases)
 
 v1.0 additions:
 ```
@@ -217,7 +217,7 @@ sealed_reveal_processed, sealed_max_bids_collected
 
 ## Class Architecture
 
-### Core Class: `YITH_WCACT_Auto_Bid` (Singleton)
+### Core Class: `WcAuction_Auto_Bid` (Singleton)
 
 **v1.0 Methods**:
 - `save_max_bid($user_id, $product_id, $max_bid)`: Store user max bid
@@ -353,14 +353,14 @@ Loop:
 
 ### v1.0 Rollback
 If critical auto-bidding issues found:
-1. Feature flag: `yith_wcact_enable_auto_bid` (disable it)
+1. Feature flag: `WcAuction_enable_auto_bid` (disable it)
 2. When disabled: skip auto-bidding, only direct bids accepted
 3. Revert commit if necessary
 4. Old code remains unchanged, new columns left in place (data integrity)
 
 ### v1.1 Rollback
 If critical sealed bid issues found:
-1. Feature flag: `yith_wcact_enable_sealed_bid` (disable it)
+1. Feature flag: `WcAuction_enable_sealed_bid` (disable it)
 2. When disabled: treat all auctions as open (v1.0 behavior)
 3. Revert commit if necessary
 4. Sealed auction data preserved for audit

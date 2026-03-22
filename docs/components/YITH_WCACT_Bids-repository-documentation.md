@@ -90,10 +90,10 @@ graph TD
 
 ### Database Schema
 
-**Table: `wp_yith_wcact_auction`**
+**Table: `wp_WcAuction_auction`**
 
 ```sql
-CREATE TABLE wp_yith_wcact_auction (
+CREATE TABLE wp_WcAuction_auction (
     id BIGINT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
     auction_id BIGINT UNSIGNED NOT NULL COMMENT 'Product ID',
     user_id BIGINT UNSIGNED NOT NULL COMMENT 'User ID',
@@ -123,7 +123,7 @@ CREATE TABLE wp_yith_wcact_auction (
 public function ensure_table_exists() {
     global $wpdb;
     
-    $table_name = $wpdb->prefix . 'yith_wcact_auction';
+    $table_name = $wpdb->prefix . 'WcAuction_auction';
     
     if ($wpdb->get_var("SHOW TABLES LIKE '$table_name'") == $table_name) {
         return;  // Table exists
@@ -153,7 +153,7 @@ public function ensure_table_exists() {
 public function add_bid($auction_id, $user_id, $bid_amount) {
     global $wpdb;
     
-    $table = $wpdb->prefix . 'yith_wcact_auction';
+    $table = $wpdb->prefix . 'WcAuction_auction';
     
     // Parameterized query prevents SQL injection
     $result = $wpdb->insert(
@@ -183,7 +183,7 @@ public function add_bid($auction_id, $user_id, $bid_amount) {
 public function get_auction_bids($auction_id, $order = 'DESC', $limit = null) {
     global $wpdb;
     
-    $table = $wpdb->prefix . 'yith_wcact_auction';
+    $table = $wpdb->prefix . 'WcAuction_auction';
     $query = $wpdb->prepare(
         "SELECT * FROM $table 
          WHERE auction_id = %d 
@@ -202,7 +202,7 @@ public function get_auction_bids($auction_id, $order = 'DESC', $limit = null) {
 public function get_highest_bid($auction_id) {
     global $wpdb;
     
-    $table = $wpdb->prefix . 'yith_wcact_auction';
+    $table = $wpdb->prefix . 'WcAuction_auction';
     return $wpdb->get_var($wpdb->prepare(
         "SELECT MAX(bid) FROM $table WHERE auction_id = %d",
         $auction_id
@@ -213,7 +213,7 @@ public function get_highest_bid($auction_id) {
 public function get_winning_bid($auction_id) {
     global $wpdb;
     
-    $table = $wpdb->prefix . 'yith_wcact_auction';
+    $table = $wpdb->prefix . 'WcAuction_auction';
     return $wpdb->get_row($wpdb->prepare(
         "SELECT * FROM $table 
          WHERE auction_id = %d AND status = 'winner' 
@@ -236,7 +236,7 @@ public function update_bid_status($bid_id, $new_status) {
         throw new Exception("Invalid status: $new_status");
     }
     
-    $table = $wpdb->prefix . 'yith_wcact_auction';
+    $table = $wpdb->prefix . 'WcAuction_auction';
     $result = $wpdb->update(
         $table,
         ['status' => $new_status],
@@ -252,7 +252,7 @@ public function update_bid_status($bid_id, $new_status) {
 public function update_all_previous_bids_to_outbid($auction_id) {
     global $wpdb;
     
-    $table = $wpdb->prefix . 'yith_wcact_auction';
+    $table = $wpdb->prefix . 'WcAuction_auction';
     $wpdb->query($wpdb->prepare(
         "UPDATE $table 
          SET status = 'outbid' 

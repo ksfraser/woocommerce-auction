@@ -1,8 +1,8 @@
 <?php
 /**
- * Unit tests for YITH_WCACT_Bid_Increment class.
+ * Unit tests for WcAuction_Bid_Increment class.
  *
- * @package YITH\Auctions\Tests\Unit
+ * @package WC\\Auction\\Tests\Unit
  * @requirement REQ-002 Bid increment by price range
  */
 
@@ -13,7 +13,7 @@ require_once __DIR__ . '/../../includes/class.yith-wcact-bid-increment.php';
 class BidIncrementTest extends TestCase {
 
     /**
-     * @var YITH_WCACT_Bid_Increment
+     * @var WcAuction_Bid_Increment
      */
     private $bid_increment;
 
@@ -26,7 +26,7 @@ class BidIncrementTest extends TestCase {
         parent::set_up();
 
         // Reset the singleton so each test gets a fresh instance
-        $reflection = new ReflectionClass( 'YITH_WCACT_Bid_Increment' );
+        $reflection = new ReflectionClass( 'WcAuction_Bid_Increment' );
         $instance_prop = $reflection->getProperty( 'instance' );
         $instance_prop->setAccessible( true );
         $instance_prop->setValue( null, null );
@@ -35,7 +35,7 @@ class BidIncrementTest extends TestCase {
         global $_test_post_meta;
         $_test_post_meta = array();
 
-        $this->bid_increment = YITH_WCACT_Bid_Increment::get_instance();
+        $this->bid_increment = WcAuction_Bid_Increment::get_instance();
 
         global $wpdb;
         $this->wpdb_mock = $wpdb;
@@ -44,7 +44,7 @@ class BidIncrementTest extends TestCase {
     protected function tear_down() {
         parent::tear_down();
         // Reset singleton
-        $reflection = new ReflectionClass( 'YITH_WCACT_Bid_Increment' );
+        $reflection = new ReflectionClass( 'WcAuction_Bid_Increment' );
         $instance_prop = $reflection->getProperty( 'instance' );
         $instance_prop->setAccessible( true );
         $instance_prop->setValue( null, null );
@@ -54,8 +54,8 @@ class BidIncrementTest extends TestCase {
      * @requirement REQ-002
      */
     public function test_get_instance_returns_singleton() {
-        $instance_a = YITH_WCACT_Bid_Increment::get_instance();
-        $instance_b = YITH_WCACT_Bid_Increment::get_instance();
+        $instance_a = WcAuction_Bid_Increment::get_instance();
+        $instance_b = WcAuction_Bid_Increment::get_instance();
         $this->assertSame( $instance_a, $instance_b );
     }
 
@@ -76,12 +76,12 @@ class BidIncrementTest extends TestCase {
         $wpdb = $mock_wpdb;
 
         // Reset singleton
-        $ref = new ReflectionClass( 'YITH_WCACT_Bid_Increment' );
+        $ref = new ReflectionClass( 'WcAuction_Bid_Increment' );
         $prop = $ref->getProperty( 'instance' );
         $prop->setAccessible( true );
         $prop->setValue( null, null );
 
-        $bi = YITH_WCACT_Bid_Increment::get_instance();
+        $bi = WcAuction_Bid_Increment::get_instance();
         $increment = $bi->get_increment_for_price( 50.00, 0 );
         $this->assertEquals( 1.00, $increment, 'Default increment should be 1.00 when no ranges configured' );
 
@@ -116,12 +116,12 @@ class BidIncrementTest extends TestCase {
         $wpdb = $mock_wpdb;
 
         // Reset singleton to use new wpdb
-        $reflection = new ReflectionClass( 'YITH_WCACT_Bid_Increment' );
+        $reflection = new ReflectionClass( 'WcAuction_Bid_Increment' );
         $instance_prop = $reflection->getProperty( 'instance' );
         $instance_prop->setAccessible( true );
         $instance_prop->setValue( null, null );
 
-        $bi = YITH_WCACT_Bid_Increment::get_instance();
+        $bi = WcAuction_Bid_Increment::get_instance();
 
         // Test each price range
         $this->assertEquals( 1.00, $bi->get_increment_for_price( 0.00, 0 ),    'Price $0 should use $1 increment' );
@@ -202,12 +202,12 @@ class BidIncrementTest extends TestCase {
         $wpdb = $mock_wpdb;
 
         // Reset singleton
-        $ref = new ReflectionClass( 'YITH_WCACT_Bid_Increment' );
+        $ref = new ReflectionClass( 'WcAuction_Bid_Increment' );
         $prop = $ref->getProperty( 'instance' );
         $prop->setAccessible( true );
         $prop->setValue( null, null );
 
-        $bi = YITH_WCACT_Bid_Increment::get_instance();
+        $bi = WcAuction_Bid_Increment::get_instance();
 
         $ranges = array(
             array( 'from_price' => 0.00, 'increment' => 1.00 ),
@@ -260,12 +260,12 @@ class BidIncrementTest extends TestCase {
         $mock_wpdb->prefix = 'wp_';
         $wpdb = $mock_wpdb;
 
-        $ref = new ReflectionClass( 'YITH_WCACT_Bid_Increment' );
+        $ref = new ReflectionClass( 'WcAuction_Bid_Increment' );
         $prop = $ref->getProperty( 'instance' );
         $prop->setAccessible( true );
         $prop->setValue( null, null );
 
-        $bi = YITH_WCACT_Bid_Increment::get_instance();
+        $bi = WcAuction_Bid_Increment::get_instance();
 
         $ranges = array(
             array( 'from_price' => 0.00, 'increment' => 0 ),
@@ -336,12 +336,12 @@ class BidIncrementTest extends TestCase {
         $wpdb = $mock_wpdb;
 
         // Reset singleton
-        $ref = new ReflectionClass( 'YITH_WCACT_Bid_Increment' );
+        $ref = new ReflectionClass( 'WcAuction_Bid_Increment' );
         $prop = $ref->getProperty( 'instance' );
         $prop->setAccessible( true );
         $prop->setValue( null, null );
 
-        $bi = YITH_WCACT_Bid_Increment::get_instance();
+        $bi = WcAuction_Bid_Increment::get_instance();
 
         // Should use product ranges
         $this->assertEquals( 2.00, $bi->get_increment_for_price( 50.00, $product_id ) );
@@ -378,12 +378,12 @@ class BidIncrementTest extends TestCase {
         $mock_wpdb->prefix = 'wp_';
         $wpdb = $mock_wpdb;
 
-        $ref = new ReflectionClass( 'YITH_WCACT_Bid_Increment' );
+        $ref = new ReflectionClass( 'WcAuction_Bid_Increment' );
         $prop = $ref->getProperty( 'instance' );
         $prop->setAccessible( true );
         $prop->setValue( null, null );
 
-        $bi = YITH_WCACT_Bid_Increment::get_instance();
+        $bi = WcAuction_Bid_Increment::get_instance();
 
         // Should use global ranges since product_uses_global = yes
         $this->assertEquals( 3.00, $bi->get_increment_for_price( 50.00, $product_id ) );

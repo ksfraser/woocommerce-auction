@@ -20,9 +20,9 @@ When User A bids with a max bid of $100:
 
 ### REQ-AUTO-001: Max Bid Storage
 - Store user's maximum bid per product in post meta: `_yith_auction_user_{user_id}_max_bid`
-- Or alternatively, create a `yith_wcact_user_max_bids` table:
+- Or alternatively, create a `WcAuction_user_max_bids` table:
   ```sql
-  CREATE TABLE wp_yith_wcact_user_max_bids (
+  CREATE TABLE wp_WcAuction_user_max_bids (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
     user_id BIGINT NOT NULL,
     product_id BIGINT NOT NULL,
@@ -42,7 +42,7 @@ When a user places a bid, they specify:
   - If only `bid_amount` is provided, it's a manual bid (current behavior)
 
 ### REQ-AUTO-003: Proxy Bid Engine
-New method in `YITH_WCACT_Bids`:
+New method in `WcAuction_Bids`:
 ```php
 public function auto_bid_on_new_bid($product_id, $new_bid_amount, $new_bid_user_id) {
     // When a new bid is placed, check if other users have max bids
@@ -97,13 +97,13 @@ When auction ends:
 ## Technical Implementation Changes
 
 ### Database Changes
-1. Create `yith_wcact_user_max_bids` table OR use post_meta pattern
-2. Add `yith_wcact_auction` table columns:
+1. Create `WcAuction_user_max_bids` table OR use post_meta pattern
+2. Add `WcAuction_auction` table columns:
    - `is_proxy_bid` (boolean) 
    - `proxy_source_bid_id` (FK to triggering bid) - nullable
    - `user_max_bid` (decimal) - nullable
 
-### Class Changes in `YITH_WCACT_Bids`:
+### Class Changes in `WcAuction_Bids`:
 ```php
 - add_bid_with_max($user_id, $auction_id, $bid, $max_bid, $date)
 - get_user_max_bid($user_id, $product_id)
@@ -111,10 +111,10 @@ When auction ends:
 - get_all_active_max_bids($product_id, $exclude_user_id = null)
 ```
 
-### Class Changes in `YITH_WCACT_Auction_Ajax`:
+### Class Changes in `WcAuction_Auction_Ajax`:
 ```php
-- Update yith_wcact_add_bid() to handle max_bid parameter
-- Call YITH_WCACT_Bids::process_proxy_bids() on successful bid
+- Update WcAuction_add_bid() to handle max_bid parameter
+- Call WcAuction_Bids::process_proxy_bids() on successful bid
 ```
 
 ### Frontend Changes

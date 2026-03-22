@@ -2,7 +2,7 @@
 
 Modern, extensible auction system for WooCommerce with real-time bidding, dynamic bid increments, and comprehensive admin controls.
 
-> **Note**: This is a community fork of [YITH Auctions for WooCommerce](https://yithemes.com/themes/plugins/yith-woocommerce-auctions/). The original YITH plugin code is preserved in this repository for reference. This fork extends and maintains auction functionality independently.
+> **Note**: This is a community fork of [WooCommerce Auction](https://yithemes.com/themes/plugins/yith-woocommerce-auctions/). The original YITH plugin code is preserved in this repository for reference. This fork extends and maintains auction functionality independently.
 
 ## Features
 
@@ -59,12 +59,12 @@ The plugin follows a **modular component-based architecture** with clear separat
 |-----------|-----------------|
 | `YITH_Auctions` | Core coordinator and singleton manager |
 | `WC_Product_Auction` | Custom product type extending WooCommerce product base |
-| `YITH_WCACT_Bids` | Bid storage, retrieval, and validation |
-| `YITH_WCACT_Bid_Increment` | Price-tier increment management |
-| `YITH_WCACT_Auction_Ajax` | Real-time AJAX bid submission |
+| `WcAuction_Bids` | Bid storage, retrieval, and validation |
+| `WcAuction_BidIncrement` | Price-tier increment management |
+| `WcAuction_Auction_Ajax` | Real-time AJAX bid submission |
 | `YITH_Auction_Admin` | Admin UI, settings, and product configuration |
 | `YITH_Auction_Frontend` | Frontend rendering and user-facing templates |
-| `YITH_WCACT_Finish_Auction` | Auction completion and winner notification |
+| `WcAuction_Finish_Auction` | Auction completion and winner notification |
 
 For detailed architecture information, see [Project_Architecture_Blueprint.md](docs/Project_Architecture_Blueprint.md).
 
@@ -114,30 +114,30 @@ See [tests/](tests/) for test organization and [phpunit.xml](phpunit.xml) for co
 
 ### Hooks
 
-- `yith_wcact_init`: Fired when plugin core initializes
-- `yith_wcact_auction_before_set_bid`: Before bid acceptance
-- `yith_wcact_user_can_make_bid`: Validate bid eligibility
+- `WcAuction_init`: Fired when plugin core initializes
+- `WcAuction_auction_before_set_bid`: Before bid acceptance
+- `WcAuction_user_can_make_bid`: Validate bid eligibility
 
 ### Filters
 
-- `yith_wcact_get_current_bid`: Modify current bid calculations
-- `yith_wcact_settings_options`: Extend settings panels
-- `yith_wcact_require_class`: Override class autoloading
+- `WcAuction_get_current_bid`: Modify current bid calculations
+- `WcAuction_settings_options`: Extend settings panels
+- `WcAuction_require_class`: Override class autoloading
 
 ### Custom Premium Features
 
 The plugin supports premium extensions through class variant detection. Define a `*_Premium` class variant to extend functionality:
 
 ```php
-// Example: YITH_WCACT_Auction_Admin_Premium extends YITH_Auction_Admin
-class YITH_WCACT_Auction_Admin_Premium extends YITH_Auction_Admin {
+// Example: WcAuction_Auction_Admin_Premium extends YITH_Auction_Admin
+class WcAuction_Auction_Admin_Premium extends YITH_Auction_Admin {
     // Premium functionality
 }
 ```
 
 ## Database Schema
 
-### `wp_yith_wcact_auction` - Bid Records
+### `wp_WcAuction_auction` - Bid Records
 
 | Column | Type | Purpose |
 |--------|------|---------|
@@ -148,7 +148,7 @@ class YITH_WCACT_Auction_Admin_Premium extends YITH_Auction_Admin {
 | `timestamp` | DATETIME | Bid submission time |
 | `status` | VARCHAR | Current status (pending, winner, outbid, etc.) |
 
-### `wp_yith_wcact_bid_increment` - Increment Ranges
+### `wp_WcAuction_BidIncrement` - Increment Ranges
 
 | Column | Type | Purpose |
 |--------|------|---------|

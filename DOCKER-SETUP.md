@@ -46,12 +46,12 @@
      --admin_email=admin@localhost.local
    ```
 
-5. **Activate WooCommerce and YITH Auctions**
+5. **Activate WooCommerce and WooCommerce Auction**
    ```bash
    # Activate WooCommerce
    docker-compose exec wordpress wp plugin activate woocommerce
    
-   # Activate YITH Auctions
+   # Activate WooCommerce Auction
    docker-compose exec wordpress wp plugin activate woocommerce-auction
    ```
 

@@ -1,4 +1,4 @@
-# Project Rename Reference - YITH Auctions → WooCommerce Auction
+# Project Rename Reference - WooCommerce Auction → WooCommerce Auction
 
 **Date**: March 2026  
 **Status**: Phase 1 Complete (infrastructure), Phase 2 Pending (documentation)
@@ -13,7 +13,7 @@ Use this document as a reference when updating code or documentation.
 | Old Pattern | New Pattern | Example |
 |-------------|-------------|---------|
 | `YITH_Auctions` | `WcAuction_` | `WcAuction_Product`, `WcAuction_Bids` |
-| `YITH_WCACT_*` | `WcAuction_*` | `WcAuction_BidIncrement`, `WcAuction_Ajax` |
+| `WcAuction_*` | `WcAuction_*` | `WcAuction_BidIncrement`, `WcAuction_Ajax` |
 
 ### PHP Namespaces
 | Old | New |
@@ -24,16 +24,16 @@ Use this document as a reference when updating code or documentation.
 ### WordPress Hooks
 | Old Pattern | New Pattern | Notes |
 |-------------|-------------|-------|
-| `yith_wcact_*` | `wc_auction_*` | Filters and actions |
+| `WcAuction_*` | `wc_auction_*` | Filters and actions |
 | `yith_auction_*` | `wc_auction_*` | Product-specific hooks |
 
 ### Database Elements
 | Element | Old | New | Notes |
 |---------|-----|-----|-------|
 | **Database name** | `yith_auctions` | `woocommerce_auction` | In `.env`, configs |
-| **Table prefix** | `wp_yith_wcact_*` | `wp_wc_auction_*` | NEW code only |
+| **Table prefix** | `wp_WcAuction_*` | `wp_wc_auction_*` | NEW code only |
 | **Meta key prefix** | `_yith_auction_*` | Keep legacy for compatibility | Existing data |
-| **Meta key prefix** | `_yith_wcact_*` | `_wc_auction_*` | NEW code uses WC |
+| **Meta key prefix** | `_WcAuction_*` | `_wc_auction_*` | NEW code uses WC |
 
 ### Docker Components
 | Old | New |
@@ -61,7 +61,7 @@ Use this document as a reference when updating code or documentation.
 | Old | New |
 |-----|-----|
 | `DB_NAME=yith_auctions` | `DB_NAME=woocommerce_auction` |
-| `SITE_TITLE=YITH Auctions Development` | `SITE_TITLE=WooCommerce Auction Development` |
+| `SITE_TITLE=WooCommerce Auction Development` | `SITE_TITLE=WooCommerce Auction Development` |
 
 ---
 
@@ -103,7 +103,7 @@ These files have 40-100+ references each and need comprehensive updates:
   - Class name references
   - Interface descriptions
 
-- [ ] `docs/components/YITH_WCACT_Bids-repository-documentation.md` (~40+ refs)
+- [ ] `docs/components/WcAuction_Bids-repository-documentation.md` (~40+ refs)
   - Rename class references
   - Update repository pattern descriptions
 
@@ -156,8 +156,8 @@ replace_in_files() {
 
 # Class name replacements
 replace_in_files "YITH_Auctions" "WcAuction_" "*.md"
-replace_in_files "YITH_WCACT_Bid_Increment" "WcAuction_BidIncrement" "*.md"
-replace_in_files "YITH_WCACT_Bids" "WcAuction_Bids" "*.md"
+replace_in_files "WcAuction_BidIncrement" "WcAuction_BidIncrement" "*.md"
+replace_in_files "WcAuction_Bids" "WcAuction_Bids" "*.md"
 replace_in_files "YITH\\\\Auctions\\\\Tests" "WC\\\\Auction\\\\Tests" "*.php"
 replace_in_files "YITH\\\\Auctions" "WC\\\\Auction" "*.php"
 
@@ -174,9 +174,9 @@ echo "✅ Documentation update complete"
 # Update all Markdown files
 find docs/ -name "*.md" -type f | xargs sed -i \
   -e 's/YITH_Auctions/WcAuction_/g' \
-  -e 's/YITH_WCACT_/WcAuction_/g' \
+  -e 's/WcAuction_/WcAuction_/g' \
   -e 's/YITH\\Auctions/WC\\Auction/g' \
-  -e 's/yith_wcact_/wc_auction_/g' \
+  -e 's/WcAuction_/wc_auction_/g' \
   -e 's/yith_auction_/wc_auction_/g'
 
 # Update test files
@@ -284,7 +284,7 @@ When updating documentation, ensure these are correctly referenced:
 
 ## Fork Information
 
-**Original Repository**: [YITH Auctions for WooCommerce](https://yithemes.com/themes/plugins/yith-woocommerce-auctions/)  
+**Original Repository**: [WooCommerce Auction](https://yithemes.com/themes/plugins/yith-woocommerce-auctions/)  
 **Fork Maintained By**: ksfraser  
 **GitHub**: https://github.com/ksfraser/woocommerce-auction  
 **Purpose**: Community-maintained fork with independent feature development

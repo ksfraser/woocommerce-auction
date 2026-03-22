@@ -51,10 +51,10 @@ Extend the progressive auto-bidding system (v1.0) with sealed bid auction mode. 
 
 ### Database Schema Changes
 
-#### Table: `wp_yith_wcact_auction` (Additional Columns)
+#### Table: `wp_WcAuction_auction` (Additional Columns)
 Extend schema from v1.0 with sealed bid columns:
 ```sql
-ALTER TABLE wp_yith_wcact_auction ADD COLUMN (
+ALTER TABLE wp_WcAuction_auction ADD COLUMN (
   -- Sealed Bid Mode columns
   is_sealed_bid TINYINT(1) DEFAULT 0 COMMENT 'True if this auction is sealed until reveal_time',
   sealed_reveal_datetime DATETIME DEFAULT NULL COMMENT 'UTC datetime when sealed bids are revealed and auto-bidding processes',
@@ -67,9 +67,9 @@ ALTER TABLE wp_yith_wcact_auction ADD COLUMN (
 Per-auction configuration stored in WordPress post meta:
 ```php
 // In product metabox, save:
-update_post_meta($product_id, '_yith_wcact_is_sealed_bid', 1/0);
-update_post_meta($product_id, '_yith_wcact_sealed_reveal_date', '2026-03-25'); // YYYY-MM-DD
-update_post_meta($product_id, '_yith_wcact_sealed_reveal_time', '16:30:00'); // HH:MM:SS UTC
+update_post_meta($product_id, '_WcAuction_is_sealed_bid', 1/0);
+update_post_meta($product_id, '_WcAuction_sealed_reveal_date', '2026-03-25'); // YYYY-MM-DD
+update_post_meta($product_id, '_WcAuction_sealed_reveal_time', '16:30:00'); // HH:MM:SS UTC
 ```
 
 ### Display Logic Enhancement
@@ -102,7 +102,7 @@ Reveal: Countdown Timer
 
 **Flow**:
 ```
-1. Cron task fires: yith_wcact_sealed_bid_reveal_check
+1. Cron task fires: WcAuction_sealed_bid_reveal_check
 2. Query all auctions WHERE is_sealed_bid=1 AND sealed_reveal_processed=0 
                         AND sealed_reveal_datetime <= NOW()
 3. FOR EACH auction:
@@ -113,11 +113,11 @@ Reveal: Countdown Timer
    e. Set sealed_reveal_processed = 1, sealed_max_bids_collected = count
    f. Log event: "Sealed bid reveal processed for product X: N bids, final=amount"
    g. COMMIT TRANSACTION
-   h. Trigger action hook: do_action('yith_wcact_sealed_bid_revealed', product_id)
+   h. Trigger action hook: do_action('WcAuction_sealed_bid_revealed', product_id)
 4. Return success (count of auctions processed)
 ```
 
-**Sub-process: `process_auto_bids_retroactive()`** (New method in YITH_WCACT_Auto_Bid)
+**Sub-process: `process_auto_bids_retroactive()`** (New method in WcAuction_Auto_Bid)
 
 NOTE: v1.1 uses SIMPLIFIED single-bid model (not cascading increments)
 
@@ -233,7 +233,7 @@ Sealed just picks highest: **A wins at $50 (simpler, fairer)**
 | Task ID | Task | File(s) | Acceptance Criteria |
 |---------|------|---------|-------------------|
 | TASK-0.1 | Add sealed bid metabox to product panel | `panel/product-auction-settings.php` or metabox | - New section: "Sealed Bid Settings"<br/>- Checkbox: "Enable Sealed Bid Mode"<br/>- Disabled by default, only available before auction starts<br/>- Disable toggle after auction start date passes |
-| TASK-0.2 | Add reveal date/time picker | `panel/product-auction-settings.php` | - Datepicker: "Reveal Date"<br/>- Timepicker: "Reveal Time (UTC)"<br/>- Validation: reveal_datetime > now() AND < auction_end_datetime<br/>- Store in post meta: _yith_wcact_sealed_reveal_date, _yith_wcact_sealed_reveal_time |
+| TASK-0.2 | Add reveal date/time picker | `panel/product-auction-settings.php` | - Datepicker: "Reveal Date"<br/>- Timepicker: "Reveal Time (UTC)"<br/>- Validation: reveal_datetime > now() AND < auction_end_datetime<br/>- Store in post meta: _WcAuction_sealed_reveal_date, _WcAuction_sealed_reveal_time |
 | TASK-0.3 | Update product save handler | `includes/class.yith-wcact-auction-product.php` | - On save: validate sealed_bid settings<br/>- Populate columns: is_sealed_bid, sealed_reveal_datetime in auction table<br/>- Error if reveal time in past<br/>- Only allow changes before auction start |
 
 **Validation**: Metabox loads, settings save/load, validation works
@@ -247,7 +247,7 @@ Sealed just picks highest: **A wins at $50 (simpler, fairer)**
 | Task ID | Task | File(s) | Acceptance Criteria |
 |---------|------|---------|-------------------|
 | TASK-1B.1 | Add sealed columns to auction table | `includes/class.yith-wcact-auction-db.php` | - Columns from §2: is_sealed_bid, sealed_reveal_datetime, sealed_reveal_processed, sealed_max_bids_collected<br/>- Migration checks for existence (idempotent)<br/>- DB version incremented to 1.3.0 |
-| TASK-1B.2 | Create sealed bid audit log table | `includes/class.yith-wcact-auction-db.php` | - New table: `wp_yith_wcact_sealed_bid_audit`<br/>- Columns: id, product_id, reveal_datetime, auto_bids_count, final_bid_amount, processed_at, status (success/error)<br/>- For tracking reveals and debugging |
+| TASK-1B.2 | Create sealed bid audit log table | `includes/class.yith-wcact-auction-db.php` | - New table: `wp_WcAuction_sealed_bid_audit`<br/>- Columns: id, product_id, reveal_datetime, auto_bids_count, final_bid_amount, processed_at, status (success/error)<br/>- For tracking reveals and debugging |
 
 **Validation**: Migrations run, columns exist, no errors
 
@@ -272,7 +272,7 @@ Sealed just picks highest: **A wins at $50 (simpler, fairer)**
 
 | Task ID | Task | File(s) | Acceptance Criteria |
 |---------|------|---------|-------------------|
-| TASK-4B.1 | Check sealed period in AJAX | `includes/class.yith-wcact-auction-ajax.php` | - In `yith_wcact_add_bid()` after bid validation:<br/>- Check: is_sealed_bid && sealed_reveal_processed==0 && now < sealed_reveal_datetime<br/>- If in sealed period:<br/>  - Accept max_bid, save to user_max_bids<br/>  - Skip call to process_auto_bids_transactional<br/>  - Return response: is_in_sealed_mode=true, countdown_seconds=(reveal - now)<br/>- If not sealed: proceed normally (v1.0 behavior) |
+| TASK-4B.1 | Check sealed period in AJAX | `includes/class.yith-wcact-auction-ajax.php` | - In `WcAuction_add_bid()` after bid validation:<br/>- Check: is_sealed_bid && sealed_reveal_processed==0 && now < sealed_reveal_datetime<br/>- If in sealed period:<br/>  - Accept max_bid, save to user_max_bids<br/>  - Skip call to process_auto_bids_transactional<br/>  - Return response: is_in_sealed_mode=true, countdown_seconds=(reveal - now)<br/>- If not sealed: proceed normally (v1.0 behavior) |
 | TASK-4B.2 | Update AJAX response for sealed | `includes/class.yith-wcact-auction-ajax.php` | - For sealed auctions:<br/>- Include: current_bid (hidden), is_sealed_mode=true, reveal_datetime, countdown_seconds<br/>- Do NOT include auto_bids_placed in sealed mode<br/>- Include: max_bid_accepted=true (if valid) |
 
 **Validation**: Sealed bids collected without auto-bidding, response identifies sealed state
@@ -300,9 +300,9 @@ Sealed just picks highest: **A wins at $50 (simpler, fairer)**
 
 | Task ID | Task | File(s) | Acceptance Criteria |
 |---------|------|---------|-------------------|
-| TASK-8.1 | Register cron event | `includes/class.yith-wcact-auction.php` | - On plugin activation: register recurring cron `yith_wcact_sealed_bid_reveal`<br/>- Schedule: Every 5 minutes (wp_schedule_event)<br/>- Hook function: `handle_sealed_bid_reveal()` |
-| TASK-8.2 | Implement reveal handler | `includes/class.yith-wcact-auto-bid.php` | - New method: `handle_sealed_bid_reveal()`<br/>- Query auctions: is_sealed_bid=1 AND sealed_reveal_processed=0 AND reveal_datetime <= NOW()<br/>- FOR EACH: call process_sealed_reveal_transactional($product_id)<br/>- Log result: count processed, any errors<br/>- Trigger hook: do_action('yith_wcact_sealed_bid_revealed_batch')<br/>- Return count of processed auctions |
-| TASK-8.3 | Create audit trail | `includes/class.yith-wcact-auction-db.php` | - After reveal processing: insert into wp_yith_wcact_sealed_bid_audit<br/>- Fields: product_id, reveal_datetime, auto_bids_count, final_bid_amount, status<br/>- Enabled debugging for reveal failures |
+| TASK-8.1 | Register cron event | `includes/class.yith-wcact-auction.php` | - On plugin activation: register recurring cron `WcAuction_sealed_bid_reveal`<br/>- Schedule: Every 5 minutes (wp_schedule_event)<br/>- Hook function: `handle_sealed_bid_reveal()` |
+| TASK-8.2 | Implement reveal handler | `includes/class.yith-wcact-auto-bid.php` | - New method: `handle_sealed_bid_reveal()`<br/>- Query auctions: is_sealed_bid=1 AND sealed_reveal_processed=0 AND reveal_datetime <= NOW()<br/>- FOR EACH: call process_sealed_reveal_transactional($product_id)<br/>- Log result: count processed, any errors<br/>- Trigger hook: do_action('WcAuction_sealed_bid_revealed_batch')<br/>- Return count of processed auctions |
+| TASK-8.3 | Create audit trail | `includes/class.yith-wcact-auction-db.php` | - After reveal processing: insert into wp_WcAuction_sealed_bid_audit<br/>- Fields: product_id, reveal_datetime, auto_bids_count, final_bid_amount, status<br/>- Enabled debugging for reveal failures |
 | TASK-8.4 | Add manual reveal trigger | `panel/admin-auction-settings.php` | - Add button in auction admin: "Force Reveal Now"<br/>- Only visible if is_sealed && not yet revealed<br/>- Calls: process_sealed_reveal_transactional(product_id)<br/>- Shows result: success/error message |
 
 **Validation**: Cron hook registered, reveals trigger automatically at time, audit logs populated
@@ -426,7 +426,7 @@ Bid History (5 total - 2 auto-bids)
 ## 7. Rollback Plan
 
 **If critical sealed bid issues found**:
-1. Feature flag: `yith_wcact_enable_sealed_bid` (default: true)
+1. Feature flag: `WcAuction_enable_sealed_bid` (default: true)
 2. If disabled during sealed period:
    - Show "Sealed bid auctions currently unavailable"
    - Accept bids normally (ignore sealed mode)
@@ -457,7 +457,7 @@ Bid History (5 total - 2 auto-bids)
 
 ### Sealed Mode Uses v1.0 Algorithm
 - Same `process_auto_bids()` method (reused)
-- Same increment calculation (YITH_WCACT_Bid_Increment)
+- Same increment calculation (WcAuction_BidIncrement)
 - Same sorted max_bid processing (DESC max_bid, ASC created_at)
 - Same transaction atomicity
 - Same iteration limits (MAX_AUTO_BID_ITERATIONS=100)
@@ -519,8 +519,8 @@ Bid History (5 total - 2 auto-bids)
 - Enhance display logic to hide/show based on sealed state
 
 ### Database
-- Add 4 columns to wp_yith_wcact_auction table
-- Add wp_yith_wcact_sealed_bid_audit table for tracking
+- Add 4 columns to wp_WcAuction_auction table
+- Add wp_WcAuction_sealed_bid_audit table for tracking
 
 ### Testing
 - 30+ new tests for sealed bid scenarios

@@ -1,4 +1,4 @@
-# YITH Auctions for WooCommerce - Architecture Summary
+# WooCommerce Auction - Architecture Summary
 
 **Plugin Version**: 1.2.4  
 **Documentation Date**: March 22, 2026  
@@ -68,16 +68,16 @@ All classes use **Singleton pattern** for instance management. Request-scoped in
 |-------|---------|-------------|
 | **YITH_Auctions** | Main plugin coordinator | `instance()`, `init_classes()`, loads all modules |
 | **WC_Product_Auction** | Extends WC_Product | `get_current_bid()`, `get_start_price()`, `get_reserve_price()` |
-| **YITH_WCACT_DB** | Database setup & migrations | `install()`, `create_db_table()` (v1.1.0 schema) |
-| **YITH_WCACT_Bids** | Bid data access layer | `add_bid()`, `get_bids_auction()`, `get_max_bid()`, `get_last_bid_user()` |
-| **YITH_WCACT_Bid_Increment** | Bid increment range management | `get_increment_for_price()`, `get_ranges()`, `save_ranges()` |
-| **YITH_WCACT_Auction_Ajax** | AJAX endpoints | `yith_wcact_add_bid()` (validates & persists bids), `redirect_to_my_account()` |
+| **WcAuction_DB** | Database setup & migrations | `install()`, `create_db_table()` (v1.1.0 schema) |
+| **WcAuction_Bids** | Bid data access layer | `add_bid()`, `get_bids_auction()`, `get_max_bid()`, `get_last_bid_user()` |
+| **WcAuction_BidIncrement** | Bid increment range management | `get_increment_for_price()`, `get_ranges()`, `save_ranges()` |
+| **WcAuction_Auction_Ajax** | AJAX endpoints | `WcAuction_add_bid()` (validates & persists bids), `redirect_to_my_account()` |
 | **YITH_Auction_Admin** | Admin UI & configuration | Panel setup, product metabox, settings options |
 | **YITH_Auction_Frontend** | Frontend UI rendering | Product page tabs, bid form, shop badges, price filters |
-| **YITH_WCACT_Auction_My_Auctions** | User auction dashboard | User's active/won auctions, bid history |
-| **YITH_WCACT_Finish_Auction** | Auction lifecycle completion | Determines winner, processes completion |
-| **YITH_WCACT_Compatibility** | Framework compatibility | Version compatibility checks |
-| **YITH_WCACT_WPML_Compatibility** | Multi-language support | WPML integration |
+| **WcAuction_Auction_My_Auctions** | User auction dashboard | User's active/won auctions, bid history |
+| **WcAuction_Finish_Auction** | Auction lifecycle completion | Determines winner, processes completion |
+| **WcAuction_Compatibility** | Framework compatibility | Version compatibility checks |
+| **WcAuction_WPML_Compatibility** | Multi-language support | WPML integration |
 
 ---
 
@@ -85,7 +85,7 @@ All classes use **Singleton pattern** for instance management. Request-scoped in
 
 ### Current Tables
 
-**`wp_yith_wcact_auction`** (Bid records)
+**`wp_WcAuction_auction`** (Bid records)
 ```sql
 id BIGINT PRIMARY KEY
 user_id BIGINT NOT NULL
@@ -94,7 +94,7 @@ bid VARCHAR(255) NOT NULL (Decimal formatted as string)
 date TIMESTAMP (Bid timestamp)
 ```
 
-**`wp_yith_wcact_bid_increment`** (Increment ranges)
+**`wp_WcAuction_BidIncrement`** (Increment ranges)
 ```sql
 id BIGINT PRIMARY KEY
 product_id BIGINT (0 = global)
@@ -111,10 +111,10 @@ increment DECIMAL(10,2) (Minimum increment)
 - `_yith_auction_use_custom_increment` - Boolean: use product-specific increments
 
 ### Future Tables (Planned)
-- `wp_yith_wcact_user_max_bids` (v1.4.0 auto-bidding)
-- `wp_yith_wcact_sealed_bid_audit` (v1.5.0 sealed reveals)
-- `wp_yith_wcact_entry_fees` (v1.4.0 fee audit)
-- `wp_yith_wcact_post_auction_log` (v1.4.0 order generation)
+- `wp_WcAuction_user_max_bids` (v1.4.0 auto-bidding)
+- `wp_WcAuction_sealed_bid_audit` (v1.5.0 sealed reveals)
+- `wp_WcAuction_entry_fees` (v1.4.0 fee audit)
+- `wp_WcAuction_post_auction_log` (v1.4.0 order generation)
 
 ---
 
@@ -124,13 +124,13 @@ increment DECIMAL(10,2) (Minimum increment)
 Located under: **YITH Plugins → Auctions → Settings**
 
 **Product Settings Section**:
-- `yith_wcact_settings_tab_auction_show_name` - Display full username in bid tab (checkbox)
-- `yith_wcact_settings_tab_auction_show_button_plus_minus` - Show bid increment/decrement buttons (checkbox)
-- `yith_wcact_settings_tab_auction_show_button_pay_now` - Show "Pay Now" button after auction ends (checkbox)
+- `WcAuction_settings_tab_auction_show_name` - Display full username in bid tab (checkbox)
+- `WcAuction_settings_tab_auction_show_button_plus_minus` - Show bid increment/decrement buttons (checkbox)
+- `WcAuction_settings_tab_auction_show_button_pay_now` - Show "Pay Now" button after auction ends (checkbox)
 
 **Global Bid Increment Ranges**:
-- `yith_wcact_global_bid_increment_ranges` - Custom field defining ranges by price tier
-- Filter: `yith_wcact_settings_options` allows premium/extension additions
+- `WcAuction_global_bid_increment_ranges` - Custom field defining ranges by price tier
+- Filter: `WcAuction_settings_options` allows premium/extension additions
 
 ### Per-Product Configuration (Product Edit Metabox)
 - Auction type selector
@@ -142,11 +142,11 @@ Located under: **YITH Plugins → Auctions → Settings**
 
 ### Constants (defined in init.php)
 ```php
-YITH_WCACT_VERSION = '1.2.4'
-YITH_WCACT_SLUG = 'yith-woocommerce-auctions'
-YITH_WCACT_PATH = plugin_dir_path(__FILE__)
-YITH_WCACT_URL = plugins_url('/', __FILE__)
-YITH_WCACT_TEMPLATE_PATH = YITH_WCACT_PATH . 'templates/'
+WcAuction_VERSION = '1.2.4'
+WcAuction_SLUG = 'yith-woocommerce-auctions'
+WcAuction_PATH = plugin_dir_path(__FILE__)
+WcAuction_URL = plugins_url('/', __FILE__)
+WcAuction_TEMPLATE_PATH = WcAuction_PATH . 'templates/'
 ```
 
 ---
@@ -220,7 +220,7 @@ YITH_WCACT_TEMPLATE_PATH = YITH_WCACT_PATH . 'templates/'
 | Test Class | Coverage | Status |
 |-----------|----------|--------|
 | `AuctionProductTest` | WC_Product_Auction methods | ✅ Active |
-| `BidIncrementTest` | YITH_WCACT_Bid_Increment methods | ✅ Active |
+| `BidIncrementTest` | WcAuction_BidIncrement methods | ✅ Active |
 
 **Sample Tests**:
 - `test_get_reserve_price_default()` - Verify default reserve price
@@ -242,15 +242,15 @@ YITH_WCACT_TEMPLATE_PATH = YITH_WCACT_PATH . 'templates/'
 ## 8. EXTENSIBILITY & HOOKS
 
 ### Key Action Hooks
-- `yith_wcact_init` - Main plugin initialization
-- `yith_wcact_auction_before_set_bid` - Pre-bid validation
-- `yith_wcact_require_class` - Filter class loading manifest
-- `yith_wcact_user_can_make_bid` - Bid permission filter
+- `WcAuction_init` - Main plugin initialization
+- `WcAuction_auction_before_set_bid` - Pre-bid validation
+- `WcAuction_require_class` - Filter class loading manifest
+- `WcAuction_user_can_make_bid` - Bid permission filter
 
 ### Filter Hooks
-- `yith_wcact_get_current_bid` - Modify displayed current bid
-- `yith_wcact_settings_options` - Add/modify settings panel options
-- `yith_wcact_auction_product_id` - Modify product ID context
+- `WcAuction_get_current_bid` - Modify displayed current bid
+- `WcAuction_settings_options` - Add/modify settings panel options
+- `WcAuction_auction_product_id` - Modify product ID context
 
 ### Plugin Framework Integration
 - Settings panel via `YITH_Plugin_Panel`
@@ -299,10 +299,10 @@ vendor/bin/phpunit --coverage-html coverage/html
 ```
 
 ### Key Entry Points
-- **Plugin init**: `init.php` → `yith_wcact_init()` → `YITH_Auctions::instance()`
+- **Plugin init**: `init.php` → `WcAuction_init()` → `YITH_Auctions::instance()`
 - **Admin interface**: `includes/class.yith-wcact-auction-admin.php`
 - **Frontend rendering**: `includes/class.yith-wcact-auction-frontend.php`
-- **Bid processing**: AJAX at `wp-admin/admin-ajax.php?action=yith_wcact_add_bid`
+- **Bid processing**: AJAX at `wp-admin/admin-ajax.php?action=WcAuction_add_bid`
 
 ### Requirement Mapping
 All code references requirements using `@requirement REQ-XXX` tags:

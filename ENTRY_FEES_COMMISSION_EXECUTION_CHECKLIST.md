@@ -1,6 +1,6 @@
 # v1.4.0 Execution Checklist: Entry Fees, Commission, Post-Auction, Notifications
 
-**Project**: YITH Auctions for WooCommerce  
+**Project**: WooCommerce Auction  
 **Version**: 1.4.0  
 **Release Date**: TBD  
 **Total Tasks**: 33  
@@ -13,11 +13,11 @@
 
 ### Task 2A-1: Database Schema - Entry Fees Audit Table
 - [ ] Create migration file: `includes/migrations/2026-03-22-entry-fees-tables.php`
-- [ ] Add columns to `wp_yith_wcact_auction`:
+- [ ] Add columns to `wp_WcAuction_auction`:
   - `entry_fee_enabled` (TINYINT)
   - `entry_fee_amount` (DECIMAL 10,2)
   - `entry_fee_description` (VARCHAR 500)
-- [ ] Create `wp_yith_wcact_entry_fees` table:
+- [ ] Create `wp_WcAuction_entry_fees` table:
   - id, product_id, user_id, fee_amount, status, paid_date, refund_date, refund_reason, created_at
   - UNIQUE KEY (product_id, user_id)
 - [ ] Add migration check to prevent duplicate runs
@@ -38,7 +38,7 @@
 - [ ] Add number input: "Entry Fee Amount ($)" (min $1.00)
 - [ ] Add textarea: "Entry Fee Description" (optional)
 - [ ] Disable entry fee fields if auction already started
-- [ ] Save values to post meta: `_yith_wcact_entry_fee_enabled`, `_yith_wcact_entry_fee_amount`
+- [ ] Save values to post meta: `_WcAuction_entry_fee_enabled`, `_WcAuction_entry_fee_amount`
 - [ ] Load and display saved values on product edit
 
 **Acceptance Criteria**:
@@ -50,7 +50,7 @@
 
 ---
 
-### Task 2A-3: Entry Fees Class - YITH_WCACT_Entry_Fees
+### Task 2A-3: Entry Fees Class - WcAuction_Entry_Fees
 - [ ] Create file: `includes/class.yith-wcact-entry-fees.php`
 - [ ] Implement methods:
   - `is_entry_fee_required($product_id)`: bool
@@ -72,7 +72,7 @@
 ---
 
 ### Task 2A-4: Entry Fee Payment Integration - AJAX Handler
-- [ ] Create AJAX action: `yith_wcact_pay_entry_fee`
+- [ ] Create AJAX action: `WcAuction_pay_entry_fee`
 - [ ] Validate: user_id, product_id, amount
 - [ ] Create WooCommerce order for entry fee (one-line order)
 - [ ] Use WC payment gateway to process payment
@@ -158,7 +158,7 @@
 - [ ] Add number input: "Commission Amount / Percentage" (dynamic label)
 - [ ] Add number input: "Minimum Commission (for hybrid model)"
 - [ ] Add textarea: "Commission Explanation Text"
-- [ ] Save to options: `yith_wcact_commission_*`
+- [ ] Save to options: `WcAuction_commission_*`
 
 **Acceptance Criteria**:
 - Settings panel loads
@@ -169,7 +169,7 @@
 
 ---
 
-### Task 3A-2: Commission Calculation Class - YITH_WCACT_Commission
+### Task 3A-2: Commission Calculation Class - WcAuction_Commission
 - [ ] Create file: `includes/class.yith-wcact-commission.php`
 - [ ] Implement methods:
   - `is_commission_enabled()`: bool
@@ -231,7 +231,7 @@
 ### Task 3A-5: Commission Line Item in Checkout
 - [ ] In checkout processing:
 - [ ] Detect if winner has active auction
-- [ ] Calculate commission via `YITH_WCACT_Commission::calculate_commission()`
+- [ ] Calculate commission via `WcAuction_Commission::calculate_commission()`
 - [ ] Add to cart as line item: "Buyer's Premium: $X.XX"
 - [ ] Update order total
 - [ ] Ensure order receipt includes commission line
@@ -263,7 +263,7 @@
 ## Phase 4A: Post-Auction Processing (6 tasks, ~12 hours)
 
 ### Task 4A-1: Post-Auction Event Handler Hook
-- [ ] Create action hook: `yith_wcact_auction_ended`
+- [ ] Create action hook: `WcAuction_auction_ended`
 - [ ] Trigger hook in auction completion logic (when auction_end_datetime <= NOW)
 - [ ] Pass parameters: `product_id, winner_user_id, final_bid_amount`
 - [ ] Add documentation for hook (filter list in docs)
@@ -278,7 +278,7 @@
 
 ### Task 4A-2: Auto-Order Generation on Auction End
 - [ ] Create post-auction event handler
-- [ ] Listen to `yith_wcact_auction_ended` hook
+- [ ] Listen to `WcAuction_auction_ended` hook
 - [ ] On trigger:
   - Get winner user
   - Create WooCommerce Order with status 'pending' (not 'processing')
@@ -286,9 +286,9 @@
   - Order line 2 (if applicable): Buyer's Premium (commission)
   - Order line 3 (if applicable): Entry Fee
   - Order total = bid + commission + entry_fee
-  - Link order to product: `update_post_meta($product_id, '_yith_wcact_order_id', $order_id)`
+  - Link order to product: `update_post_meta($product_id, '_WcAuction_order_id', $order_id)`
   - Store auction_winner_user_id in order meta
-- [ ] Log to `wp_yith_wcact_post_auction_log` table
+- [ ] Log to `wp_WcAuction_post_auction_log` table
 - [ ] Handle errors gracefully (log, send admin email)
 
 **Acceptance Criteria**:
@@ -343,7 +343,7 @@
     - New end_datetime = NOW() + reschedule_interval_days
   - Mark old auction as 'rescheduled'
   - Update `payment_status` to 'unpaid'
-- [ ] Log all actions to `wp_yith_wcact_post_auction_log`
+- [ ] Log all actions to `wp_WcAuction_post_auction_log`
 
 **Acceptance Criteria**:
 - Unpaid detection works
@@ -356,8 +356,8 @@
 ---
 
 ### Task 4A-5: Post-Auction Log Table & Database Schema
-- [ ] Create migration for `wp_yith_wcact_post_auction_log` table (if not done in 2A-1)
-- [ ] Add columns to `wp_yith_wcact_auction`:
+- [ ] Create migration for `wp_WcAuction_post_auction_log` table (if not done in 2A-1)
+- [ ] Add columns to `wp_WcAuction_auction`:
   - `order_id` (INT, nullable)
   - `payment_status` (ENUM: 'pending', 'paid', 'failed', 'unpaid')
 - [ ] Verify migration idempotency
@@ -460,10 +460,10 @@
 
 ### Task 5A-3: Notification Event Hooks Integration
 - [ ] Hook into bid placement (v1.0):
-  - After successful bid: `do_action('yith_wcact_bid_placed', $product_id, $user_id, $bid_amount)`
+  - After successful bid: `do_action('WcAuction_bid_placed', $product_id, $user_id, $bid_amount)`
   - Handler calls: `send_new_bid_notification()` to all previous bidders (with frequency limit)
 - [ ] Hook into outbid detection:
-  - When auto-bid creates new leading bid: `do_action('yith_wcact_outbid', ...)`
+  - When auto-bid creates new leading bid: `do_action('WcAuction_outbid', ...)`
   - Handler calls: `send_outbid_notification()` to outbid user
 - [ ] Hook into auction ending (WordPress cron):
   - 24 hours before: call `send_ending_soon_notification()`
@@ -500,7 +500,7 @@
 - [ ] Add number input: "New Bid Frequency Limit (seconds)" (default: 300 = 5 min)
 - [ ] Add checkbox: "Include Unsubscribe Link in Emails"
 - [ ] Add textarea: "Notification Opt-Out Instructions"
-- [ ] Save all settings to options: `yith_wcact_notification_*`
+- [ ] Save all settings to options: `WcAuction_notification_*`
 
 **Acceptance Criteria**:
 - Settings panel loads
@@ -514,7 +514,7 @@
 ### Task 5A-5: Frequency Limiting for New Bid Notification
 - [ ] In `send_new_bid_notification()`:
 - [ ] Query `wp_postmeta` for last notification timestamp sent to each user:
-  - Query: `SELECT meta_value WHERE meta_key = '_yith_wcact_last_new_bid_emails' AND post_id = $product_id`
+  - Query: `SELECT meta_value WHERE meta_key = '_WcAuction_last_new_bid_emails' AND post_id = $product_id`
   - Check each recipient's last email time
 - [ ] If last email < frequency_limit seconds ago: skip this recipient
 - [ ] Update meta with current timestamp after sending
@@ -533,10 +533,10 @@
   - Token = `base64(user_id.product_id.timestamp)`
   - Store in DB (optional, or derive from input)
 - [ ] Add unsubscribe link to all emails:
-  - Link: `/wp-admin/admin-ajax.php?action=yith_wcact_unsubscribe_notification&token=<TOKEN>`
+  - Link: `/wp-admin/admin-ajax.php?action=WcAuction_unsubscribe_notification&token=<TOKEN>`
 - [ ] Create AJAX handler for unsubscribe:
   - Decode token
-  - Update user meta: `_yith_wcact_notifications_disabled_auctions` (array)
+  - Update user meta: `_WcAuction_notifications_disabled_auctions` (array)
   - Return success message
 - [ ] In `send_*_notification()` methods:
   - Check if user is unsubscribed from this auction
@@ -578,9 +578,9 @@
 - [ ] In product template: `templates/frontend/auction-product-details.php`
 - [ ] Remove/hide "Buy Now" price display (if it exists from v1.0)
 - [ ] Replace with button: "Add Regular Item to Cart"
-- [ ] Button triggers: `yith_wcact_add_regular_item_to_cart()` function
+- [ ] Button triggers: `WcAuction_add_regular_item_to_cart()` function
 - [ ] Function:
-  - Gets parent_product_id from meta: `_yith_wcact_parent_product_id`
+  - Gets parent_product_id from meta: `_WcAuction_parent_product_id`
   - Adds to WC cart: `WC()->cart->add_to_cart($parent_product_id)`
   - Redirects to cart page
 
@@ -599,7 +599,7 @@
 - [ ] Field type: Dropdown/Select2 with product search
 - [ ] Filter: Only show non-auction (regular) products
 - [ ] Default: Empty/None
-- [ ] Save to post meta: `_yith_wcact_parent_product_id`
+- [ ] Save to post meta: `_WcAuction_parent_product_id`
 - [ ] Load and display saved value
 
 **Acceptance Criteria**:

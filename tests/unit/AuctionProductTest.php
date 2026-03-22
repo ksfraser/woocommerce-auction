@@ -2,7 +2,7 @@
 /**
  * Unit tests for WC_Product_Auction class reserve price and bid increment methods.
  *
- * @package YITH\Auctions\Tests\Unit
+ * @package WC\\Auction\\Tests\Unit
  * @requirement REQ-001 Starting bid
  * @requirement REQ-003 Reserve price
  * @requirement REQ-002 Bid increment by price range
@@ -210,7 +210,7 @@ class AuctionProductTest extends TestCase {
     }
 
     /**
-     * Test get_bid_increment delegates to YITH_WCACT_Bid_Increment.
+     * Test get_bid_increment delegates to WcAuction_Bid_Increment.
      *
      * @requirement REQ-002
      */
@@ -232,7 +232,7 @@ class AuctionProductTest extends TestCase {
         $wpdb = $mock;
 
         // Reset bid increment singleton
-        $ref = new ReflectionClass( 'YITH_WCACT_Bid_Increment' );
+        $ref = new ReflectionClass( 'WcAuction_Bid_Increment' );
         $prop = $ref->getProperty( 'instance' );
         $prop->setAccessible( true );
         $prop->setValue( null, null );
@@ -273,7 +273,7 @@ class AuctionProductTest extends TestCase {
         $wpdb = $mock;
 
         // Reset bid increment singleton
-        $ref = new ReflectionClass( 'YITH_WCACT_Bid_Increment' );
+        $ref = new ReflectionClass( 'WcAuction_Bid_Increment' );
         $prop = $ref->getProperty( 'instance' );
         $prop->setAccessible( true );
         $prop->setValue( null, null );
@@ -315,7 +315,7 @@ class AuctionProductTest extends TestCase {
         $wpdb = $mock;
 
         // Reset bid increment singleton
-        $ref = new ReflectionClass( 'YITH_WCACT_Bid_Increment' );
+        $ref = new ReflectionClass( 'WcAuction_Bid_Increment' );
         $prop = $ref->getProperty( 'instance' );
         $prop->setAccessible( true );
         $prop->setValue( null, null );

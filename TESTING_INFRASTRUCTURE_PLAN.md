@@ -1,4 +1,4 @@
-# YITH Auctions - Testing Infrastructure & Mocking Strategy (Packagist-Ready)
+# WooCommerce Auction - Testing Infrastructure & Mocking Strategy (Packagist-Ready)
 
 **Date**: March 22, 2026  
 **Version**: 1.0  
@@ -276,11 +276,11 @@ class ProductFactory {
     public static function asAuctionProduct($args = []) {
         $args['type'] = 'auction';
         $args['post_meta'] = array_merge($args['post_meta'] ?? [], [
-            '_yith_wcact_enabled' => 'yes',
-            '_yith_wcact_start_price' => 10.00,
-            '_yith_wcact_reserve_price' => 50.00,
-            '_yith_wcact_start_date' => date('Y-m-d H:i:s'),
-            '_yith_wcact_end_date' => date('Y-m-d H:i:s', strtotime('+7 days')),
+            '_WcAuction_enabled' => 'yes',
+            '_WcAuction_start_price' => 10.00,
+            '_WcAuction_reserve_price' => 50.00,
+            '_WcAuction_start_date' => date('Y-m-d H:i:s'),
+            '_WcAuction_end_date' => date('Y-m-d H:i:s', strtotime('+7 days')),
         ]);
         return self::create($args);
     }
@@ -351,32 +351,32 @@ class AuctionProductBuilder {
     }
     
     public function withStartPrice($price) {
-        $this->config['_yith_wcact_start_price'] = $price;
+        $this->config['_WcAuction_start_price'] = $price;
         return $this;
     }
     
     public function withReservePrice($price) {
-        $this->config['_yith_wcact_reserve_price'] = $price;
+        $this->config['_WcAuction_reserve_price'] = $price;
         return $this;
     }
     
     public function withEntryFee($amount) {
-        $this->config['_yith_wcact_entry_fee_enabled'] = 'yes';
-        $this->config['_yith_wcact_entry_fee_amount'] = $amount;
+        $this->config['_WcAuction_entry_fee_enabled'] = 'yes';
+        $this->config['_WcAuction_entry_fee_amount'] = $amount;
         return $this;
     }
     
     public function withCommission($model, $rate = null, $flat = null) {
         // model: 'percentage', 'flat', 'hybrid'
-        $this->config['_yith_wcact_commission_model'] = $model;
-        if ($rate) $this->config['_yith_wcact_commission_rate'] = $rate;
-        if ($flat) $this->config['_yith_wcact_commission_flat'] = $flat;
+        $this->config['_WcAuction_commission_model'] = $model;
+        if ($rate) $this->config['_WcAuction_commission_rate'] = $rate;
+        if ($flat) $this->config['_WcAuction_commission_flat'] = $flat;
         return $this;
     }
     
     public function withSealedBid($revealDate) {
-        $this->config['_yith_wcact_is_sealed_bid'] = 'yes';
-        $this->config['_yith_wcact_sealed_reveal_datetime'] = $revealDate;
+        $this->config['_WcAuction_is_sealed_bid'] = 'yes';
+        $this->config['_WcAuction_sealed_reveal_datetime'] = $revealDate;
         return $this;
     }
     
@@ -521,7 +521,7 @@ class AuctionProductTest extends TestCase {
 
 ```
 1. Create test file: tests/unit/class.yith-wcact-entry-fees.test.php
-2. Write ALL test cases for YITH_WCACT_Entry_Fees class
+2. Write ALL test cases for WcAuction_Entry_Fees class
 3. Verify tests FAIL (red phase)
 4. Write implementation code to PASS tests (green phase)
 5. Refactor if needed (refactor phase)
@@ -537,7 +537,7 @@ class AuctionProductTest extends TestCase {
 use Yith\TestFactories\AuctionProductBuilder;
 use Yith\MockWooCommerce\TestCase;
 
-class YITH_WCACT_Entry_Fees_Test extends TestCase {
+class WcAuction_Entry_Fees_Test extends TestCase {
     
     /**
      * @requirement REQ-ENTRY-001
@@ -547,7 +547,7 @@ class YITH_WCACT_Entry_Fees_Test extends TestCase {
             ->withEntryFee(0)  // Disabled
             ->build();
         
-        $entry_fees = new YITH_WCACT_Entry_Fees();
+        $entry_fees = new WcAuction_Entry_Fees();
         $this->assertFalse($entry_fees->is_entry_fee_required($auction->get_id()));
     }
     
@@ -555,7 +555,7 @@ class YITH_WCACT_Entry_Fees_Test extends TestCase {
      * @requirement REQ-ENTRY-002
      */
     public function test_entry_fee_minimum_is_one_dollar() {
-        $entry_fees = new YITH_WCACT_Entry_Fees();
+        $entry_fees = new WcAuction_Entry_Fees();
         
         $this->assertFalse($entry_fees->validate_amount(0.50));
         $this->assertTrue($entry_fees->validate_amount(1.00));
@@ -570,7 +570,7 @@ class YITH_WCACT_Entry_Fees_Test extends TestCase {
             ->withEntryFee(5.00)
             ->build();
         
-        $entry_fees = new YITH_WCACT_Entry_Fees();
+        $entry_fees = new WcAuction_Entry_Fees();
         $user_id = 123;
         
         // User hasn't paid
@@ -585,7 +585,7 @@ class YITH_WCACT_Entry_Fees_Test extends TestCase {
      * @requirement REQ-ENTRY-008
      */
     public function test_entry_fee_payment_audit_trail() {
-        $entry_fees = new YITH_WCACT_Entry_Fees();
+        $entry_fees = new WcAuction_Entry_Fees();
         
         $entry_fees->record_fee_payment(
             product_id: 456,
@@ -612,11 +612,11 @@ Then write code to pass tests:
  * 
  * @requirement REQ-ENTRY-001 through REQ-ENTRY-008
  */
-class YITH_WCACT_Entry_Fees {
+class WcAuction_Entry_Fees {
     
     public function is_entry_fee_required($product_id) {
         // REQ-ENTRY-001
-        return (bool) get_post_meta($product_id, '_yith_wcact_entry_fee_enabled', true);
+        return (bool) get_post_meta($product_id, '_WcAuction_entry_fee_enabled', true);
     }
     
     public function validate_amount($amount) {
@@ -635,7 +635,7 @@ class YITH_WCACT_Entry_Fees {
         // REQ-ENTRY-008: audit trail
         global $wpdb;
         $wpdb->insert(
-            'wp_yith_wcact_entry_fees',
+            'wp_WcAuction_entry_fees',
             [
                 'product_id' => $product_id,
                 'user_id' => $user_id,

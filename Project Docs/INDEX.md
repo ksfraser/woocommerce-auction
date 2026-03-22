@@ -1,4 +1,4 @@
-# YITH Auctions Auto-Bidding: Complete Documentation Index
+# WooCommerce Auction Auto-Bidding: Complete Documentation Index
 
 **Last Updated**: March 22, 2026  
 **Scope**: Auto-Bidding (v1.0) + Sealed Bids (v1.1)  

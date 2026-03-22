@@ -1,6 +1,6 @@
 # Contributing to WooCommerce Auction
 
-Thank you for considering contributing to YITH Auctions for WooCommerce! This document provides guidelines and instructions for contributing to the project.
+Thank you for considering contributing to WooCommerce Auction! This document provides guidelines and instructions for contributing to the project.
 
 ## Code of Conduct
 
@@ -387,4 +387,4 @@ We appreciate your contributions! Contributors will be:
 - Recognized in release notes
 - Invited to discuss major decisions
 
-Thank you for helping make YITH Auctions better! 🎉
+Thank you for helping make WooCommerce Auction better! 🎉

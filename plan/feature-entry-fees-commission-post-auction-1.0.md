@@ -91,30 +91,30 @@ Add entry fee system, winner commission charging, post-auction order automation,
 
 ### Database Schema Changes
 
-#### Table: `wp_yith_wcact_auction` (Additional Columns)
+#### Table: `wp_WcAuction_auction` (Additional Columns)
 
 ```sql
 -- Entry Fee columns
-ALTER TABLE wp_yith_wcact_auction ADD COLUMN (
+ALTER TABLE wp_WcAuction_auction ADD COLUMN (
   entry_fee_enabled TINYINT(1) DEFAULT 0 COMMENT 'True if entry fee required',
   entry_fee_amount DECIMAL(10,2) DEFAULT 0 COMMENT 'Entry fee in store currency',
   entry_fee_collected INT DEFAULT 0 COMMENT 'Count of entry fees paid'
 );
 
 -- Post-auction status columns
-ALTER TABLE wp_yith_wcact_auction ADD COLUMN (
+ALTER TABLE wp_WcAuction_auction ADD COLUMN (
   auction_result_order_id BIGINT DEFAULT NULL COMMENT 'FK to wp_posts order created at auction end',
   winner_payment_status ENUM('pending', 'paid', 'failed') DEFAULT 'pending',
   winner_charged_at DATETIME DEFAULT NULL COMMENT 'When auto-charge attempted'
 );
 ```
 
-#### New Table: `wp_yith_wcact_entry_fees`
+#### New Table: `wp_WcAuction_entry_fees`
 
 Track entry fee payments separately for audit:
 
 ```sql
-CREATE TABLE wp_yith_wcact_entry_fees (
+CREATE TABLE wp_WcAuction_entry_fees (
   id BIGINT PRIMARY KEY AUTO_INCREMENT,
   user_id BIGINT NOT NULL,
   product_id BIGINT NOT NULL,
@@ -128,12 +128,12 @@ CREATE TABLE wp_yith_wcact_entry_fees (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 ```
 
-#### New Table: `wp_yith_wcact_post_auction_log`
+#### New Table: `wp_WcAuction_post_auction_log`
 
 Track post-auction events:
 
 ```sql
-CREATE TABLE wp_yith_wcact_post_auction_log (
+CREATE TABLE wp_WcAuction_post_auction_log (
   id BIGINT PRIMARY KEY AUTO_INCREMENT,
   product_id BIGINT NOT NULL,
   event_type ENUM('order_created', 'charge_attempted', 'charge_success', 
@@ -205,7 +205,7 @@ Post-Auction Settings (Global):
 | TASK-2A.1 | Add entry fee columns to auction table | `includes/class.yith-wcact-auction-db.php` | - 3 columns added (entry_fee_enabled, entry_fee_amount, entry_fee_collected)<br/>- Idempotent migration<br/>- DB version incremented to 1.4.0 |
 | TASK-2A.2 | Create entry_fees audit table | `includes/class.yith-wcact-auction-db.php` | - Table created with schema from §2<br/>- Indexes on product_user, status<br/>- Idempotent migration |
 | TASK-2A.3 | Add UI for entry fee config | `panel/product-auction-settings.php` | - Checkbox: "Require entry fee"<br/>- Text input: fee amount (min $1)<br/>- Validation: amount >= 1, numeric<br/>- Save to post_meta |
-| TASK-2A.4 | Create YITH_WCACT_Entry_Fee class | `includes/class.yith-wcact-entry-fee.php` | - Singleton pattern<br/>- Methods: collect_fee(), refund_fee(), get_fees_for_user(), get_fee_paid_count()<br/>- PHPDoc with @requirement tags |
+| TASK-2A.4 | Create WcAuction_Entry_Fee class | `includes/class.yith-wcact-entry-fee.php` | - Singleton pattern<br/>- Methods: collect_fee(), refund_fee(), get_fees_for_user(), get_fee_paid_count()<br/>- PHPDoc with @requirement tags |
 | TASK-2A.5 | Modify AJAX bid handler for entry fees | `includes/class.yith-wcact-auction-ajax.php` | - Check if entry fee required<br/>- If not paid: redirect to fee payment<br/>- If paid: allow bid normally<br/>- Return fee_required flag in response |
 | TASK-2A.6 | Create fee payment flow | `templates/woocommerce/auction-entry-fee.php` | - Payment form (redirect to checkout)<br/>- Fee + product added as line item<br/>- Success page confirms entry<br/>- Failure page offers retry |
 
@@ -220,7 +220,7 @@ Post-Auction Settings (Global):
 | Task ID | Task | File(s) | Acceptance Criteria |
 |---------|------|---------|-------------------|
 | TASK-3A.1 | Add module settings for commission | `admin/auction-settings-page.php` | - Settings UI: commission model (%, flat, hybrid)<br/>- Percentage input field<br/>- Flat fee input field<br/>- Commission explanation text editor<br/>- Save to wp_options |
-| TASK-3A.2 | Create YITH_WCACT_Commission class | `includes/class.yith-wcact-commission.php` | - Singleton pattern<br/>- Methods: calculate_commission($bid_amount), get_settings(), format_explanation()<br/>- Support 3 models: percentage, flat, hybrid<br/>- PHPDoc with @requirement |
+| TASK-3A.2 | Create WcAuction_Commission class | `includes/class.yith-wcact-commission.php` | - Singleton pattern<br/>- Methods: calculate_commission($bid_amount), get_settings(), format_explanation()<br/>- Support 3 models: percentage, flat, hybrid<br/>- PHPDoc with @requirement |
 | TASK-3A.3 | Add commission display to auction page | `templates/woocommerce/single-product/auction-details.php` | - Display: "Buyer's Premium: [explanation link]"<br/>- Show calculated commission for current bid (dynamic JS)<br/>- Link explains commission | - Modal/popup with explanation text |
 | TASK-3A.4 | Create commission explanation modal | `templates/woocommerce/auction-commission-explainer.php` | - Modal content: commission definition, calculation example<br/>- Close button<br/>- Linked from auction page |
 | TASK-3A.5 | Add commission to checkout | `includes/class.yith-wcact-auction-cart.php` | - If auction item: calculate commission<br/>- Add as line item in cart<br/>- Display: "Buyer's Premium: $X.XX"<br/>- Include in order total |
@@ -255,8 +255,8 @@ Post-Auction Settings (Global):
 | TASK-5A.1 | Create notification event handlers | `includes/class.yith-wcact-notifications.php` | - New class with methods:<br/>- on_new_bid($bid_id)<br/>- on_outbid($user_id, $product_id)<br/>- on_auction_ending_soon($product_id, $time_left)<br/>- on_auction_ended($product_id)<br/>- on_entry_fee_paid($user_id, $product_id, $amount)<br/>- on_admin_unpaid_auction($product_id) |
 | TASK-5A.2 | Create email templates | `templates/emails/` | - new-bid.php<br/>- outbid.php<br/>- ending-soon.php<br/>- auction-ended.php<br/>- entry-fee-confirmation.php<br/>- unpaid-auction-2nd-bidder.php<br/>- All with editable copy, hooks for filters |
 | TASK-5A.3 | Add notification settings UI | `admin/auction-settings-page.php` | - Checkboxes for each notification type<br/>- "From" name field<br/>- Email template editor (if using custom emails)<br/>- Test email button<br/>- Save to wp_options |
-| TASK-5A.4 | Hook into bid placement | `includes/class.yith-wcact-auction-ajax.php` | - On successful bid: fire do_action('yith_wcact_new_bid')<br/>- Handler calls notifications->on_new_bid()<br/>- Logs notification attempt |
-| TASK-5A.5 | Hook into auction end | `includes/class.yith-wcact-auction-finish.php` | - On auction completion: fire hooks<br/>- do_action('yith_wcact_auction_ended')<br/>- do_action('yith_wcact_entry_fee_confirmation')<br/>- Handlers send notifications |
+| TASK-5A.4 | Hook into bid placement | `includes/class.yith-wcact-auction-ajax.php` | - On successful bid: fire do_action('WcAuction_new_bid')<br/>- Handler calls notifications->on_new_bid()<br/>- Logs notification attempt |
+| TASK-5A.5 | Hook into auction end | `includes/class.yith-wcact-auction-finish.php` | - On auction completion: fire hooks<br/>- do_action('WcAuction_auction_ended')<br/>- do_action('WcAuction_entry_fee_confirmation')<br/>- Handlers send notifications |
 | TASK-5A.6 | Implement frequency limiting | `includes/class.yith-wcact-notifications.php` | - Override for "too many emails": max 1 outbid notification per user per 5 min<br/>- Batch multiple bids if rapid<br/>- Log frequency limits<br/>- Admin can override in settings |
 
 **Validation**: Notifications sent on all events, templates customizable, frequency limits work
@@ -284,7 +284,7 @@ Post-Auction Settings (Global):
 | Task ID | Task | File(s) | Acceptance Criteria |
 |---------|------|---------|-------------------|
 | TASK-6A.1 | Modify auction product display | `templates/woocommerce/single-product/auction-details.php` | - Remove "Buy Now Price" display<br/>- Add button: "Buy Regular Item at Full Price"<br/>- Button links to parent product (add to cart)<br/>- CSS styling for button<br/>- Hidden if no parent product exists |
-| TASK-6A.2 | Store parent product relationship | `includes/class.yith-wcact-auction-product.php` | - New method: set_parent_product($auction_product_id, $regular_product_id)<br/>- New method: get_parent_product($auction_product_id)<br/>- Store in post_meta: _yith_wcact_parent_product_id<br/>- Validate on save: parent exists and is different |
+| TASK-6A.2 | Store parent product relationship | `includes/class.yith-wcact-auction-product.php` | - New method: set_parent_product($auction_product_id, $regular_product_id)<br/>- New method: get_parent_product($auction_product_id)<br/>- Store in post_meta: _WcAuction_parent_product_id<br/>- Validate on save: parent exists and is different |
 | TASK-6A.3 | Update product metabox | `panel/product-auction-settings.php` | - Add field: "Parent Product (Full Price Version)"<br/>- Product selection field (autocomplete)<br/>- Display relationship: "Auction of Product [name]"<br/>- Allow clearing parent<br/>- Validation: can't link to itself |
 | TASK-6A.4 | Button links to parent in cart | `templates/woocommerce/single-product/add-to-cart/auction.php` | - Button click: redirect to parent product<br/>- Parent product auto-loads in cart<br/>- OR: if button on auction page, redirect to parent cart page<br/>- URL: /product/[parent-id]/ or /cart/ with parent |
 

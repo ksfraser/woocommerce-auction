@@ -3,10 +3,10 @@
  * Integration Tests for YITH Auctions - Auction Workflow
  *
  * @requirement REQ-CORE-003, REQ-CORE-004, REQ-CORE-007
- * @covers YITH_Auctions, WC_Product_Auction, YITH_WCACT_Bids
+ * @covers YITH_Auctions, WC_Product_Auction, WcAuction_Bids
  */
 
-namespace YITH\Auctions\Tests\Integration;
+namespace WC\\Auction\\Tests\Integration;
 
 use PHPUnit\Framework\TestCase;
 use ksfraser\TestFactories\Builders\ScenarioBuilder;
@@ -16,7 +16,7 @@ use ksfraser\TestFactories\Builders\ScenarioBuilder;
  *
  * Tests the complete auction lifecycle from creation to completion
  *
- * @package YITH\Auctions\Tests\Integration
+ * @package WC\\Auction\\Tests\Integration
  */
 class AuctionWorkflowIntegrationTest extends TestCase
 {

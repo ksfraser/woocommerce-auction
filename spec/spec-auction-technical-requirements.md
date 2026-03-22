@@ -1,5 +1,5 @@
 ---
-title: YITH Auctions for WooCommerce - Technical Specification
+title: WooCommerce Auction - Technical Specification
 version: 1.0
 date_created: 2026-03-22
 last_updated: 2026-03-22
@@ -7,11 +7,11 @@ owner: Development Team
 tags: [specification, auction, woocommerce, technical, requirements]
 ---
 
-# YITH Auctions for WooCommerce - Technical Specification
+# WooCommerce Auction - Technical Specification
 
 ## 1. Introduction
 
-This specification defines the technical requirements, constraints, and interfaces for the YITH Auctions for WooCommerce plugin. It provides a precise, AI-optimized reference for developing, maintaining, and extending the system.
+This specification defines the technical requirements, constraints, and interfaces for the WooCommerce Auction plugin. It provides a precise, AI-optimized reference for developing, maintaining, and extending the system.
 
 ## 2. Purpose & Scope
 
@@ -73,7 +73,7 @@ This specification defines the technical requirements, constraints, and interfac
 
 #### REQ-CORE-003: Bid Submission
 - System SHALL accept bid submissions via AJAX endpoint only
-- Endpoint: `wp-admin/admin-ajax.php?action=yith_wcact_submit_bid`
+- Endpoint: `wp-admin/admin-ajax.php?action=WcAuction_submit_bid`
 - Request MUST include authenticated user ID and valid nonce
 - Bid amount MUST exceed current highest bid + required increment
 - Bid MUST be accepted within 100ms response time (SLA)
@@ -115,7 +115,7 @@ This specification defines the technical requirements, constraints, and interfac
   - Identify highest bid as winner
   - Update all outbid bid statuses to "outbid"
   - Update winning bid status to "winner"
-  - Trigger `yith_wcact_auction_finished` action
+  - Trigger `WcAuction_auction_finished` action
   - Send winner notification email (if configured)
   - Create pending order (if payment integration active)
 
@@ -213,7 +213,7 @@ This specification defines the technical requirements, constraints, and interfac
 **Request:**
 ```json
 {
-    "action": "yith_wcact_submit_bid",
+    "action": "WcAuction_submit_bid",
     "auction_id": 12345,
     "bid_amount": 250.50,
     "nonce": "abc123def456"
@@ -249,10 +249,10 @@ This specification defines the technical requirements, constraints, and interfac
 }
 ```
 
-### 5.2 Database Table: `wp_yith_wcact_auction`
+### 5.2 Database Table: `wp_WcAuction_auction`
 
 ```sql
-CREATE TABLE wp_yith_wcact_auction (
+CREATE TABLE wp_WcAuction_auction (
     id BIGINT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
     auction_id BIGINT UNSIGNED NOT NULL COMMENT 'WooCommerce product ID',
     user_id BIGINT UNSIGNED NOT NULL COMMENT 'WordPress user ID',
@@ -265,10 +265,10 @@ CREATE TABLE wp_yith_wcact_auction (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 ```
 
-### 5.3 Database Table: `wp_yith_wcact_bid_increment`
+### 5.3 Database Table: `wp_WcAuction_BidIncrement`
 
 ```sql
-CREATE TABLE wp_yith_wcact_bid_increment (
+CREATE TABLE wp_WcAuction_BidIncrement (
     id BIGINT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
     product_id BIGINT UNSIGNED NOT NULL COMMENT '0 = global, else product ID',
     from_price DECIMAL(10,2) UNSIGNED NOT NULL COMMENT 'Range start',
@@ -295,7 +295,7 @@ CREATE TABLE wp_yith_wcact_bid_increment (
 
 ### 5.5 Class Interfaces
 
-#### `YITH_WCACT_Bids` Repository Interface
+#### `WcAuction_Bids` Repository Interface
 
 ```php
 /**
@@ -389,7 +389,7 @@ public function get_auction_increment_value($current_bid);
 1. Query all bids for auction
 2. Mark highest bid as status='winner'
 3. Mark all others as status='outbid'
-4. Trigger yith_wcact_auction_finished action
+4. Trigger WcAuction_auction_finished action
 5. Send winner notification email
 
 ### AC-005: Bid History Retrieval

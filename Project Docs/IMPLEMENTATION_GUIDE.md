@@ -78,7 +78,7 @@ When a bid is placed, the system auto-increments competing max bids:
 
 | Phase | Goal | Key Deliverable | Complexity | Est. Hours |
 |-------|------|------|------------|-----------|
-| 1 | Database schema + service class | `YITH_WCACT_Auto_Bid` class | Low | 2 |
+| 1 | Database schema + service class | `WcAuction_Auto_Bid` class | Low | 2 |
 | 2 | Max bid storage/retrieval | CRUD methods for max_bids | Low | 2 |
 | 3 | Auto-bidding engine | `process_auto_bids()` algorithm | High | 4 |
 | 4 | AJAX integration | Connect to bid submission | Medium | 3 |
@@ -158,18 +158,18 @@ readme.txt                               Phase 7.4: Version bump to 1.4.0
 
 ## Database Schema Changes
 
-### Existing Table: `wp_yith_wcact_auction` (APPEND columns)
+### Existing Table: `wp_WcAuction_auction` (APPEND columns)
 ```sql
-ALTER TABLE wp_yith_wcact_auction ADD COLUMN (
+ALTER TABLE wp_WcAuction_auction ADD COLUMN (
   is_proxy_bid TINYINT(1) DEFAULT 0,
   proxy_source_bid_id BIGINT DEFAULT NULL,
   user_max_bid DECIMAL(10,2) DEFAULT NULL
 );
 ```
 
-### New Table: `wp_yith_wcact_user_max_bids`
+### New Table: `wp_WcAuction_user_max_bids`
 ```sql
-CREATE TABLE wp_yith_wcact_user_max_bids (
+CREATE TABLE wp_WcAuction_user_max_bids (
   id BIGINT PRIMARY KEY AUTO_INCREMENT,
   user_id BIGINT NOT NULL,
   product_id BIGINT NOT NULL,
@@ -185,7 +185,7 @@ CREATE TABLE wp_yith_wcact_user_max_bids (
 
 ---
 
-## Core Class: YITH_WCACT_Auto_Bid
+## Core Class: WcAuction_Auto_Bid
 
 ### Public Methods (from Phase 2-3)
 
@@ -259,9 +259,9 @@ git commit -m "feat: Add proxy auto-bidding with progressive max bid processing
 - Implement REQ-AUTO-007: Self-bid prevention
 
 Features:
-- New YITH_WCACT_Auto_Bid class with singleton pattern
-- Database table: wp_yith_wcact_user_max_bids
-- Extended wp_yith_wcact_auction with proxy tracking
+- New WcAuction_Auto_Bid class with singleton pattern
+- Database table: wp_WcAuction_user_max_bids
+- Extended wp_WcAuction_auction with proxy tracking
 - 34 unit + integration tests (≥95% coverage)
 - Full documentation and user guide
 
@@ -280,7 +280,7 @@ Version bumped to 1.4.0"
 - User feedback on fairness
 
 ### Rollback Plan (if critical issues)
-1. Add feature flag: `yith_wcact_enable_auto_bid` (default: true)
+1. Add feature flag: `WcAuction_enable_auto_bid` (default: true)
 2. If set to false: skip auto-bidding, only direct bids
 3. Keep old columns/logic intact
 4. Can revert commit without data loss
@@ -307,7 +307,7 @@ Version bumped to 1.4.0"
 1. **Review Phase 1** (`feature-auto-bidding-1.md`, section "Phase 1")
 2. **Check Prerequisites**:
    - [ ] PHPUnit configured ✓
-   - [ ] YITH_WCACT_Bid_Increment available ✓
+   - [ ] WcAuction_BidIncrement available ✓
    - [ ] DB access and version control ✓
 3. **Create development branch**: `git checkout -b feature/auto-bidding`
 4. **Start Phase 1 tasks** following `EXECUTION_CHECKLIST.md`

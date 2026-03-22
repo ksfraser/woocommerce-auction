@@ -33,9 +33,9 @@ Implement a progressive auto-bidding (proxy bidding) system that automatically i
 
 ### Constraints
 - **CON-001**: Keep existing bid table structure unchanged (maintain backward compatibility)
-- **CON-002**: Bids already stored in `wp_yith_wcact_auction` table, add columns incrementally
+- **CON-002**: Bids already stored in `wp_WcAuction_auction` table, add columns incrementally
 - **CON-003**: Must support both manual bids AND auto-bids seamlessly
-- **CON-004**: Increment values determined by `YITH_WCACT_Bid_Increment` class per price range
+- **CON-004**: Increment values determined by `WcAuction_BidIncrement` class per price range
 
 ### Design Patterns
 - **PAT-001**: Use Singleton pattern for bid engine (consistent state)
@@ -48,19 +48,19 @@ Implement a progressive auto-bidding (proxy bidding) system that automatically i
 
 ### Database Schema Changes
 
-#### Table: `wp_yith_wcact_auction` (Existing)
+#### Table: `wp_WcAuction_auction` (Existing)
 Add these columns:
 ```sql
-ALTER TABLE wp_yith_wcact_auction ADD COLUMN (
+ALTER TABLE wp_WcAuction_auction ADD COLUMN (
   is_proxy_bid TINYINT(1) DEFAULT 0 COMMENT 'True if this is auto-bid',
   proxy_source_bid_id BIGINT DEFAULT NULL COMMENT 'FK to bid that triggered this auto-bid',
   user_max_bid DECIMAL(10,2) DEFAULT NULL COMMENT 'Max bid for this user (only if proxy)'
 );
 ```
 
-#### New Table: `wp_yith_wcact_user_max_bids`
+#### New Table: `wp_WcAuction_user_max_bids`
 ```sql
-CREATE TABLE wp_yith_wcact_user_max_bids (
+CREATE TABLE wp_WcAuction_user_max_bids (
   id BIGINT PRIMARY KEY AUTO_INCREMENT,
   user_id BIGINT NOT NULL,
   product_id BIGINT NOT NULL,
@@ -76,7 +76,7 @@ CREATE TABLE wp_yith_wcact_user_max_bids (
 
 ### Processing Algorithm: Progressive Auto-Bidding
 
-**Trigger**: When `YITH_WCACT_Auction_Ajax::yith_wcact_add_bid()` receives a valid bid
+**Trigger**: When `WcAuction_Auction_Ajax::WcAuction_add_bid()` receives a valid bid
 
 **Flow**:
 ```
@@ -155,9 +155,9 @@ LOOP:
 
 | Task ID | Task | File(s) | Acceptance Criteria |
 |---------|------|---------|-------------------|
-| TASK-1.1 | Create migration script for new columns | `includes/class.yith-wcact-auction-db.php` | - `is_proxy_bid`, `proxy_source_bid_id`, `user_max_bid` columns added to `wp_yith_wcact_auction`<br/>- Migration checks for column existence before adding (idempotent)<br/>- DB version incremented to 1.2.0 |
-| TASK-1.2 | Create migration for user max_bids table | `includes/class.yith-wcact-auction-db.php` | - `wp_yith_wcact_user_max_bids` table created<br/>- Unique constraint on (user_id, product_id)<br/>- Indexes on product_id + max_bid, user_id<br/>- Created/updated timestamps |
-| TASK-1.3 | Create `YITH_WCACT_Auto_Bid` class | `includes/class.yith-wcact-auto-bid.php` | - Singleton pattern implemented<br/>- Constructor initializes table names<br/>- Methods stubbed: process_auto_bids(), get_all_max_bids(), get_increment_for_price()<br/>- PHPDoc with requirement references |
+| TASK-1.1 | Create migration script for new columns | `includes/class.yith-wcact-auction-db.php` | - `is_proxy_bid`, `proxy_source_bid_id`, `user_max_bid` columns added to `wp_WcAuction_auction`<br/>- Migration checks for column existence before adding (idempotent)<br/>- DB version incremented to 1.2.0 |
+| TASK-1.2 | Create migration for user max_bids table | `includes/class.yith-wcact-auction-db.php` | - `wp_WcAuction_user_max_bids` table created<br/>- Unique constraint on (user_id, product_id)<br/>- Indexes on product_id + max_bid, user_id<br/>- Created/updated timestamps |
+| TASK-1.3 | Create `WcAuction_Auto_Bid` class | `includes/class.yith-wcact-auto-bid.php` | - Singleton pattern implemented<br/>- Constructor initializes table names<br/>- Methods stubbed: process_auto_bids(), get_all_max_bids(), get_increment_for_price()<br/>- PHPDoc with requirement references |
 | TASK-1.4 | Add class initialization in main plugin | `includes/class.yith-wcact-auction.php` | - Load new class in init_classes()<br/>- Make accessible via YITH_Auctions()->auto_bid<br/>- No errors on instantiation |
 
 **Validation**: Run unit test: new class loads, singleton returns same instance, tables exist
@@ -185,7 +185,7 @@ LOOP:
 
 | Task ID | Task | File(s) | Acceptance Criteria |
 |---------|------|---------|-------------------|
-| TASK-3.1 | Implement `process_auto_bids()` method | `includes/class.yith-wcact-auto-bid.php` | - Signature: process_auto_bids($product_id, $new_bid_amount, $new_bid_user_id)<br/>- Implements algorithm from Architecture section<br/>- Returns array of auto-bids placed: [{user_id, bid_amount, source_bid_id}, ...]<br/>- Stops when no competing max_bid exists or no progress made<br/>- Uses YITH_WCACT_Bid_Increment for increment calculation |
+| TASK-3.1 | Implement `process_auto_bids()` method | `includes/class.yith-wcact-auto-bid.php` | - Signature: process_auto_bids($product_id, $new_bid_amount, $new_bid_user_id)<br/>- Implements algorithm from Architecture section<br/>- Returns array of auto-bids placed: [{user_id, bid_amount, source_bid_id}, ...]<br/>- Stops when no competing max_bid exists or no progress made<br/>- Uses WcAuction_BidIncrement for increment calculation |
 | TASK-3.2 | Add auto-bid insertion to bids table | `includes/class.yith-wcact-auto-bid.php` | - New method: `insert_auto_bid($user_id, $product_id, $bid_amount, $source_bid_id, $user_max_bid)`<br/>- Sets: is_proxy_bid=true, proxy_source_bid_id=$source_bid_id, user_max_bid=$user_max_bid<br/>- Uses wpdb->insert() with prepared format<br/>- Returns new bid ID |
 | TASK-3.3 | Wrap process in transaction | `includes/class.yith-wcact-auto-bid.php` | - New method: `process_auto_bids_transactional()`<br/>- Begins transaction, calls process_auto_bids(), commits on success<br/>- Rolls back on exception<br/>- Returns same result as process_auto_bids() |
 | TASK-3.4 | Add max increment iteration limit | `includes/class.yith-wcact-auto-bid.php` | - Add constant: `MAX_AUTO_BID_ITERATIONS = 100`<br/>- process_auto_bids() exits after 100 iterations (prevents infinite loops)<br/>- Log warning if limit hit |
@@ -200,7 +200,7 @@ LOOP:
 
 | Task ID | Task | File(s) | Acceptance Criteria |
 |---------|------|---------|-------------------|
-| TASK-4.1 | Modify AJAX bid handler | `includes/class.yith-wcact-auction-ajax.php` | - In `yith_wcact_add_bid()` after successful bid validation:<br/>- Extract `max_bid` parameter from POST (floatval, sanitize)<br/>- If max_bid provided: call `save_max_bid(user_id, product_id, max_bid)`<br/>- Call `process_auto_bids_transactional(product_id, bid, user_id)`<br/>- Use try-catch for transaction handling |
+| TASK-4.1 | Modify AJAX bid handler | `includes/class.yith-wcact-auction-ajax.php` | - In `WcAuction_add_bid()` after successful bid validation:<br/>- Extract `max_bid` parameter from POST (floatval, sanitize)<br/>- If max_bid provided: call `save_max_bid(user_id, product_id, max_bid)`<br/>- Call `process_auto_bids_transactional(product_id, bid, user_id)`<br/>- Use try-catch for transaction handling |
 | TASK-4.2 | Update AJAX response | `includes/class.yith-wcact-auction-ajax.php` | - Add to JSON response: `auto_bids_placed: count(auto_bid_results)`<br/>- Add: `current_leading_bid: final_bid_after_auto_bids`<br/>- Add: `current_leader_id: final_leading_user_id` |
 | TASK-4.3 | Update frontend form | `templates/woocommerce/single-product/add-to-cart/auction.php` | - Add hidden input: `<input type="number" name="max_bid" data-auto-bid>`<br/>- Display dynamically (JS controlled, hidden by default)<br/>- Add label: "My maximum bid (auto-increment up to this amount)" |
 | TASK-4.4 | Update frontend JavaScript | `assets/js/frontend.js` | - On bid form submission: collect max_bid from input<br/>- Add to POST data under key `max_bid`<br/>- On response: display if auto_bids_placed > 0: "3 other bids auto-placed to match yours"<br/>- Update displayed current_leading_bid with response value |
@@ -245,7 +245,7 @@ LOOP:
 
 | Task ID | Task | File(s) | Acceptance Criteria |
 |---------|------|---------|-------------------|
-| TASK-7.1 | Create architecture documentation | `Project Docs/AUTO_BIDDING_IMPLEMENTATION.md` | - Explain algorithm with diagrams<br/>- Document data schema changes<br/>- List new public methods in YITH_WCACT_Auto_Bid<br/>- Include example walkthrough (3 bidders) |
+| TASK-7.1 | Create architecture documentation | `Project Docs/AUTO_BIDDING_IMPLEMENTATION.md` | - Explain algorithm with diagrams<br/>- Document data schema changes<br/>- List new public methods in WcAuction_Auto_Bid<br/>- Include example walkthrough (3 bidders) |
 | TASK-7.2 | Add PHPDoc to all new methods | `includes/class.yith-wcact-auto-bid.php` | - Every method has: @param, @return, @requirement tags<br/>- Include requirement IDs (REQ-AUTO-*)<br/>- Include UML diagrams in class docblock |
 | TASK-7.3 | Create user-facing documentation | `Project Docs/AUTO_BIDDING_USER_GUIDE.md` | - Explain proxy bidding for site admins<br/>- Explain for end users (how to use max bid)<br/>- FAQ: "What is auto-bidding?", "Why did my bid increase?" |
 | TASK-7.4 | Update README | `readme.txt` | - Add feature: "Proxy Bidding - Automatic bid increments on behalf of max bidders"<br/>- Update version to 1.4.0<br/>- Update changelog |
@@ -306,7 +306,7 @@ try {
 ### Bi-Directional Increment Lookup
 ```php
 // Get increment for CURRENT price (to determine next step)
-$increment = YITH_WCACT_Bid_Increment::get_instance()
+$increment = WcAuction_BidIncrement::get_instance()
     ->get_increment_for_price($current_bid, $product_id);
 // Auto-bid amount = current_bid + increment (up to max)
 $auto_bid_amount = min($current_bid + $increment, $max_bid);
@@ -332,7 +332,7 @@ $auto_bid_amount = min($current_bid + $increment, $max_bid);
 
 If critical issues found post-deployment:
 1. Keep old bid table columns/logic intact (don't delete)
-2. Add feature flag: `yith_wcact_enable_auto_bid` option (default: true)
+2. Add feature flag: `WcAuction_enable_auto_bid` option (default: true)
 3. If disabled: new bids skip auto-bid processing, only manual bids recorded
 4. Revert commit, disable feature flag, redeploy
 

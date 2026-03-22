@@ -9,10 +9,10 @@
 
 ## Phase 1: Database Schema & Service Class Foundation
 
-### Deliverable: Extend DB schema + create YITH_WCACT_Auto_Bid class
+### Deliverable: Extend DB schema + create WcAuction_Auto_Bid class
 
 - [ ] **TASK-1.1**: Create migration script for new columns
-  - [ ] Alter `wp_yith_wcact_auction` table
+  - [ ] Alter `wp_WcAuction_auction` table
     - [ ] Add `is_proxy_bid` TINYINT(1) DEFAULT 0
     - [ ] Add `proxy_source_bid_id` BIGINT DEFAULT NULL
     - [ ] Add `user_max_bid` DECIMAL(10,2) DEFAULT NULL
@@ -21,14 +21,14 @@
   - [ ] Verify migration is idempotent (re-run safe)
 
 - [ ] **TASK-1.2**: Create migration for user max_bids table
-  - [ ] Create `wp_yith_wcact_user_max_bids` table
+  - [ ] Create `wp_WcAuction_user_max_bids` table
     - [ ] Columns: id, user_id, product_id, max_bid, current_proxy_bid, created_at, updated_at
     - [ ] UNIQUE KEY on (user_id, product_id)
     - [ ] INDEX on product_id + max_bid DESC
     - [ ] INDEX on user_id
   - [ ] Add to `class.yith-wcact-auction-db.php`
 
-- [ ] **TASK-1.3**: Create YITH_WCACT_Auto_Bid class
+- [ ] **TASK-1.3**: Create WcAuction_Auto_Bid class
   - [ ] File: `includes/class.yith-wcact-auto-bid.php`
   - [ ] Implement Singleton pattern
   - [ ] Constructor: initialize `$this->table_name` and `$this->user_max_bids_table`
@@ -46,7 +46,7 @@
   - [ ] Edit `includes/class.yith-wcact-auction.php`
   - [ ] Add require/include for new class
   - [ ] Add `'includes/class.yith-wcact-auto-bid.php'` to `$common_requires`
-  - [ ] Initialize: `$this->auto_bid = YITH_WCACT_Auto_Bid::get_instance()`
+  - [ ] Initialize: `$this->auto_bid = WcAuction_Auto_Bid::get_instance()`
   - [ ] Make accessible via `YITH_Auctions()->auto_bid`
   - [ ] Test: no PHP errors on plugin load
 
@@ -128,7 +128,7 @@
 
 - [ ] **TASK-4.1**: Modify AJAX bid handler
   - [ ] File: `includes/class.yith-wcact-auction-ajax.php`
-  - [ ] In `yith_wcact_add_bid()` method:
+  - [ ] In `WcAuction_add_bid()` method:
     - [ ] Extract `max_bid` from POST: `floatval(sanitize_text_field(...))`
     - [ ] After bid validation & insert:
       - [ ] Call `save_max_bid($userid, $product_id, $max_bid)` if provided
@@ -248,7 +248,7 @@
   - [ ] Include:
     - [ ] Algorithm with diagrams
     - [ ] Data schema changes
-    - [ ] Public methods in YITH_WCACT_Auto_Bid
+    - [ ] Public methods in WcAuction_Auto_Bid
     - [ ] Example walkthrough (3 bidders)
 
 - [ ] **TASK-7.2**: Add PHPDoc to all methods
@@ -296,7 +296,7 @@
 
 **Prerequisites**:
 - PHPUnit configured ✓
-- `YITH_WCACT_Bid_Increment` class available ✓
+- `WcAuction_BidIncrement` class available ✓
 - Existing bid table structure understood ✓
 
 **Post-Deployment**:
