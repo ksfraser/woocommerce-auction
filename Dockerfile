@@ -1,4 +1,4 @@
-# Multi-stage build for YITH Auctions for WooCommerce
+# Multi-stage build for WooCommerce Auction
 
 # Stage 1: Builder
 FROM php:8.1-fpm as builder

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ruleset name="YITH Auctions Ruleset">
-    <description>PHPMD ruleset for YITH Auctions for WooCommerce</description>
+<ruleset name="WooCommerce Auction Ruleset">
+    <description>PHPMD ruleset for WooCommerce Auction</description>
 
     <!-- Code Size Rules -->
     <rule ref="rulesets/codesize.xml/CyclomaticComplexity">

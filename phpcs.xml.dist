@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
-<ruleset name="YITH Auctions PHPCS Standard">
-    <description>Code standard for YITH Auctions for WooCommerce</description>
+<ruleset name="WooCommerce Auction PHPCS Standard">
+    <description>Code standard for WooCommerce Auction</description>
 
     <!-- Include WordPress Coding Standards -->
     <rule ref="WordPress-Core">

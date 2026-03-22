@@ -1,6 +1,6 @@
 {
-    "name": "yith/auctions-for-woocommerce",
-    "description": "YITH Auctions for WooCommerce plugin",
+    "name": "ksfraser/woocommerce-auction",
+    "description": "WooCommerce Auction plugin - forked from YITH Auctions for WooCommerce",
     "type": "wordpress-plugin",
     "license": "GPL-3.0-or-later",
     "require": {
@@ -28,13 +28,13 @@
     ],
     "autoload": {
         "psr-4": {
-            "YITH\\Auctions\\": "src/",
+            "WC\\Auction\\": "src/",
             "ksfraser\\": "src/ksfraser/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "YITH\\Auctions\\Tests\\": "tests/",
+            "WC\\Auction\\Tests\\": "tests/",
             "ksfraser\\": "tests/ksfraser/"
         }
     },

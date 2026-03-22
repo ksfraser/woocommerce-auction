@@ -1,6 +1,8 @@
-# YITH Auctions for WooCommerce
+# WooCommerce Auction
 
 Modern, extensible auction system for WooCommerce with real-time bidding, dynamic bid increments, and comprehensive admin controls.
+
+> **Note**: This is a community fork of [YITH Auctions for WooCommerce](https://yithemes.com/themes/plugins/yith-woocommerce-auctions/). The original YITH plugin code is preserved in this repository for reference. This fork extends and maintains auction functionality independently.
 
 ## Features
 
@@ -22,7 +24,7 @@ Modern, extensible auction system for WooCommerce with real-time bidding, dynami
 ## Installation
 
 1. Download or clone the repository
-2. Place the `yith-auctions-for-woocommerce` folder in your WordPress plugins directory
+2. Place the `woocommerce-auction` folder in your WordPress plugins directory
 3. Activate the plugin through the WordPress admin panel
 4. Configure auction settings in WooCommerce → Auctions
 

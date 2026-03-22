@@ -1,4 +1,4 @@
-# Contributing to YITH Auctions for WooCommerce
+# Contributing to WooCommerce Auction
 
 Thank you for considering contributing to YITH Auctions for WooCommerce! This document provides guidelines and instructions for contributing to the project.
 
@@ -30,8 +30,8 @@ See [DOCKER-SETUP.md](DOCKER-SETUP.md) for detailed instructions.
 #### Option 2: Local Development
 ```bash
 # Clone the repository
-git clone https://github.com/ksfraser/yith-auctions-for-woocommerce.git
-cd yith-auctions-for-woocommerce
+git clone https://github.com/ksfraser/woocommerce-auction.git
+cd woocommerce-auction
 
 # Install dependencies
 composer install

@@ -4,10 +4,10 @@ services:
   # MySQL Database
   db:
     image: mysql:8.0
-    container_name: yith-auctions-db
+    container_name: woocommerce-auction-db
     environment:
       MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-rootpassword}
-      MYSQL_DATABASE: ${DB_NAME:-yith_auctions}
+      MYSQL_DATABASE: ${DB_NAME:-woocommerce_auction}
       MYSQL_USER: ${DB_USER:-auction_user}
       MYSQL_PASSWORD: ${DB_PASSWORD:-auction_password}
     ports:
@@ -16,7 +16,7 @@ services:
       - db_data:/var/lib/mysql
       - ./docker/mysql-init:/docker-entrypoint-initdb.d
     networks:
-      - yith-network
+      - woocommerce-auction-network
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       timeout: 20s
@@ -25,10 +25,10 @@ services:
   # WordPress with WooCommerce
   wordpress:
     image: wordpress:6.3-php8.1-fpm
-    container_name: yith-auctions-wordpress
+    container_name: woocommerce-auction-wordpress
     environment:
       WORDPRESS_DB_HOST: db:3306
-      WORDPRESS_DB_NAME: ${DB_NAME:-yith_auctions}
+      WORDPRESS_DB_NAME: ${DB_NAME:-woocommerce_auction}
       WORDPRESS_DB_USER: ${DB_USER:-auction_user}
       WORDPRESS_DB_PASSWORD: ${DB_PASSWORD:-auction_password}
       WORDPRESS_TABLE_PREFIX: wp_
@@ -38,13 +38,13 @@ services:
       - "9000:9000"
     volumes:
       - wordpress_data:/var/www/html
-      - ./:/var/www/html/wp-content/plugins/yith-auctions
+      - ./:/var/www/html/wp-content/plugins/woocommerce-auction
       - ./docker/php.ini:/usr/local/etc/php/php.ini
     depends_on:
       db:
         condition: service_healthy
     networks:
-      - yith-network
+      - woocommerce-auction-network
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:9000/wp-json/"]
       timeout: 20s
@@ -53,7 +53,7 @@ services:
   # Nginx reverse proxy
   nginx:
     image: nginx:alpine
-    container_name: yith-auctions-nginx
+    container_name: woocommerce-auction-nginx
     ports:
       - "80:80"
       - "443:443"
@@ -64,7 +64,7 @@ services:
     depends_on:
       - wordpress
     networks:
-      - yith-network
+      - woocommerce-auction-network
     healthcheck:
       test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/"]
       timeout: 10s
@@ -73,11 +73,11 @@ services:
   # Memcached for caching
   memcached:
     image: memcached:alpine
-    container_name: yith-auctions-cache
+    container_name: woocommerce-auction-cache
     ports:
       - "11211:11211"
     networks:
-      - yith-network
+      - woocommerce-auction-network
     healthcheck:
       test: ["CMD", "echo", "stats", "|", "nc", "localhost", "11211"]
       timeout: 5s
@@ -86,11 +86,11 @@ services:
   # Redis for session storage (optional)
   redis:
     image: redis:7-alpine
-    container_name: yith-auctions-redis
+    container_name: woocommerce-auction-redis
     ports:
       - "6379:6379"
     networks:
-      - yith-network
+      - woocommerce-auction-network
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       timeout: 5s
@@ -99,7 +99,7 @@ services:
   # PHPMyAdmin for database management
   phpmyadmin:
     image: phpmyadmin:latest
-    container_name: yith-auctions-phpmyadmin
+    container_name: woocommerce-auction-phpmyadmin
     environment:
       PMA_HOST: db
       PMA_USER: ${DB_USER:-auction_user}
@@ -109,24 +109,22 @@ services:
     depends_on:
       - db
     networks:
-      - yith-network
+      - woocommerce-auction-network
 
   # MailHog for email testing
   mailhog:
     image: mailhog/mailhog:latest
-    container_name: yith-auctions-mailhog
+    container_name: woocommerce-auction-mailhog
     ports:
       - "1025:1025"
       - "8025:8025"
     networks:
-      - yith-network
-
-volumes:
+      - woocommerce-auction-network
   db_data:
     driver: local
   wordpress_data:
     driver: local
 
 networks:
-  yith-network:
+  woocommerce-auction-network:
     driver: bridge

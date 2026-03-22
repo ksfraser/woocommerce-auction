@@ -1,4 +1,4 @@
-# Docker Setup Guide for YITH Auctions for WooCommerce
+# Docker Setup Guide for WooCommerce Auction
 
 > 💡 **Cost Optimization Tip**: This guide covers Docker for **local development**. For **free CI/CD** without GitHub minute charges, see [LOCAL-RUNNER-SETUP.md](LOCAL-RUNNER-SETUP.md) to run the CI/CD pipeline on your local machine (self-hosted runner). This eliminates charges entirely!
 
@@ -15,8 +15,8 @@
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/ksfraser/yith-auctions-for-woocommerce.git
-   cd yith-auctions-for-woocommerce
+   git clone https://github.com/ksfraser/woocommerce-auction.git
+   cd woocommerce-auction
    ```
 
 2. **Copy environment configuration**
@@ -31,17 +31,16 @@
    ```
    This will:
    - Create MySQL database
-   - Start WordPress with WooCommerce
-   - Launch Nginx reverse proxy
-   - Set up Memcached and Redis
-   - Start PHPMyAdmin and MailHog
-
+  - Start WordPress with WooCommerce
+  - Launch Nginx reverse proxy
+  - Set up Memcached and Redis
+  - Start PHPMyAdmin and MailHog
 4. **Initial WordPress setup**
    ```bash
    # Install WordPress core
    docker-compose exec wordpress wp core install \
      --url=http://localhost \
-     --title="YITH Auctions" \
+     --title="WooCommerce Auction" \
      --admin_user=admin \
      --admin_password=password \
      --admin_email=admin@localhost.local
@@ -53,7 +52,7 @@
    docker-compose exec wordpress wp plugin activate woocommerce
    
    # Activate YITH Auctions
-   docker-compose exec wordpress wp plugin activate yith-auctions-for-woocommerce
+   docker-compose exec wordpress wp plugin activate woocommerce-auction
    ```
 
 ### Access URLs

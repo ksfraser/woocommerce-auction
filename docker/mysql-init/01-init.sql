@@ -1,14 +1,14 @@
--- Database initialization script for YITH Auctions for WooCommerce
+-- Database initialization script for WooCommerce Auction
 -- This script is executed on first run of the MySQL container
 
 -- Use the auction database
-USE yith_auctions;
+USE woocommerce_auction;
 
 -- Create YITH Auctions tables (these will be created by plugin on activation)
 -- This is a placeholder for initial database setup if needed
 
 -- Grant privileges
-GRANT ALL PRIVILEGES ON yith_auctions.* TO 'auction_user'@'%';
+GRANT ALL PRIVILEGES ON woocommerce_auction.* TO 'auction_user'@'%';
 FLUSH PRIVILEGES;
 
 -- Create indices for performance

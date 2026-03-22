@@ -1,4 +1,4 @@
-name: CI/CD - Testing & Quality Assurance
+name: CI/CD - WooCommerce Auction - Testing & Quality Assurance
 
 on:
   push:
@@ -144,13 +144,13 @@ jobs:
       - uses: actions/checkout@v3
 
       - name: Build Docker image
-        run: docker build -t yith-auctions:latest .
+        run: docker build -t woocommerce-auction:latest .
         continue-on-error: true
 
       - name: Scan image for vulnerabilities
         run: |
           docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
-            aquasec/trivy image yith-auctions:latest
+            aquasec/trivy image woocommerce-auction:latest
         continue-on-error: true
 
   security-audit:
