@@ -1,0 +1,68 @@
+@startuml Auto-Bidding Algorithm Flow
+!theme plain
+
+participant "User B" as UB
+participant "Frontend" as FE
+participant "AJAX Handler" as AJAX
+participant "Auto-Bid Engine" as ABE
+participant "Database" as DB
+
+UB -> FE: Places bid $21\n(max bid: $30)
+FE -> FE: Validate bid ≥ minimum
+
+FE -> AJAX: POST bid=$21, max_bid=$30
+activate AJAX
+
+AJAX -> AJAX: Validate bid amount
+AJAX -> DB: INSERT bid(user=B, amount=$21, is_proxy=false)
+note right DB: Bid 1: B=$21 (current: $21)
+
+AJAX -> ABE: process_auto_bids(\n  product=X, \n  new_bid=$21,\n  new_user=B)
+activate ABE
+
+ABE -> DB: SELECT all max_bids \n WHERE product=X \n AND max_bid > $21 \n ORDER BY max_bid DESC
+DB --> ABE: Returns [A(max=$22)]
+activate ABE: Loop 1
+ABE -> ABE: CURRENT=$21, INCREMENT=$1
+ABE -> ABE: User A: max=$22 > $21? YES
+ABE -> ABE: auto_bid = min($21+$1, $22) = $22
+ABE -> DB: INSERT bid(user=A, amount=$22, \nis_proxy=true, source=$21)
+DB --> ABE: Inserted
+note right DB: Bid 2: A=$22 (current: $22)
+ABE -> DB: UPDATE user_max_bids \nSET current_proxy_bid=$22
+deactivate ABE
+
+ABE -> DB: SELECT all max_bids \n WHERE product=X \n AND max_bid > $22
+DB --> ABE: Returns [B(max=$30)]
+activate ABE: Loop 2
+ABE -> ABE: CURRENT=$22, INCREMENT=$1
+ABE -> ABE: User B: max=$30 > $22? YES
+ABE -> ABE: auto_bid = min($22+$1, $30) = $23
+ABE -> DB: INSERT bid(user=B, amount=$23, \nis_proxy=true, source=$22)
+DB --> ABE: Inserted
+note right DB: Bid 3: B=$23 (current: $23)
+ABE -> DB: UPDATE user_max_bids \nSET current_proxy_bid=$23
+deactivate ABE
+
+ABE -> DB: SELECT all max_bids \n WHERE product=X \n AND max_bid > $23
+DB --> ABE: Returns [A(max=$22)] \n(but max < $23)
+activate ABE: Loop 3
+ABE -> ABE: Filter: max_bid > $23?
+ABE -> ABE: User A: max=$22 NOT > $23? NO
+ABE -> ABE: No eligible bidders
+ABE -> ABE: EXIT LOOP
+deactivate ABE
+
+ABE --> AJAX: Returns [\n  {user: A, bid: $22},\n  {user: B, bid: $23}\n]
+deactivate ABE
+
+AJAX -> AJAX: Build response
+AJAX --> FE: JSON: {\n  bid_accepted: true,\n  current_bid: $23,\n  leading_user: B,\n  auto_bids_placed: 2\n}
+
+FE -> FE: Update display
+FE -> UB: "3 bids placed:\n  You bid $21\n  Competitor auto-bid $22\n  You auto-bid $23\n  Current: B leading at $23"
+
+deactivate AJAX
+deactivate FE
+
+@enduml
