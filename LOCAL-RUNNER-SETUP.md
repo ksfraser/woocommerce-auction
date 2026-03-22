@@ -75,12 +75,9 @@ Invoke-WebRequest -Uri $downloadUrl -OutFile actions-runner-win-x64.zip
 Expand-Archive -Path actions-runner-win-x64.zip -DestinationPath .
 ```
 
-**Step 3: Configure the runner** (use GitHub's provided commands)
+### Step 2: Configure runner** (use GitHub's provided token)
 ```powershell
-# Self-hosted runners need to authenticate with GitHub
-# Use the registration token provided by GitHub (expires in 1 hour)
-
-./config.cmd --url https://github.com/YOUR-USERNAME/YOUR-REPO `
+./config.cmd --url https://github.com/ksfraser/woocommerce-auction `
   --token REPLACE_WITH_GITHUB_PROVIDED_TOKEN
 ```
 
@@ -131,7 +128,7 @@ tar xzf actions-runner-$RUNNER_OS-$ARCH.tar.gz
 
 **Step 3: Configure runner** (use GitHub's provided token)
 ```bash
-./config.sh --url https://github.com/YOUR-USERNAME/YOUR-REPO \
+./config.sh --url https://github.com/ksfraser/woocommerce-auction \
   --token REPLACE_WITH_GITHUB_PROVIDED_TOKEN
 ```
 
@@ -493,9 +490,9 @@ Invoke-WebRequest -Uri "https://github.com/actions/runner/releases/download/v2.3
   -OutFile "actions-runner-win-x64.zip"
 Expand-Archive -Path "actions-runner-win-x64.zip"
 
-# Configure (replace TOKEN and REPO)
+# Configure (replace TOKEN - get from GitHub Settings > Actions > Runners)
 cd $runnerDir
-./config.cmd --url https://github.com/YOUR-USERNAME/YOUR-REPO --token YOUR-TOKEN-HERE
+./config.cmd --url https://github.com/ksfraser/woocommerce-auction --token YOUR-TOKEN-HERE
 
 # Install as service
 ./svc.cmd install
@@ -515,8 +512,8 @@ mkdir -p ~/actions-runner && cd ~/actions-runner
 wget https://github.com/actions/runner/releases/download/v2.318.0/actions-runner-linux-x64-2.318.0.tar.gz
 tar xzf actions-runner-linux-x64-2.318.0.tar.gz
 
-# Configure (replace TOKEN and REPO)
-./config.sh --url https://github.com/YOUR-USERNAME/YOUR-REPO --token YOUR-TOKEN-HERE
+# Configure (replace TOKEN - get from GitHub Settings > Actions > Runners)
+./config.sh --url https://github.com/ksfraser/woocommerce-auction --token YOUR-TOKEN-HERE
 
 # Install as systemd service
 sudo ./svc.sh install
