@@ -595,7 +595,92 @@ class PaymentAuthorizationRepositoryTest extends TestCase
     }
 
     /**
-     * Test pruning old resolved records.
+     * Test retrieving refund by ID.
+     *
+     * @test
+     * @requirement REQ-ENTRY-FEE-PAYMENT-001
+     */
+    public function test_get_refund_by_id(): void
+    {
+        // Arrange
+        $refund_id = 'REFUND-123';
+        $refund_record = [
+            'id' => 1,
+            'refund_id' => 'REFUND-123',
+            'status' => 'PENDING',
+            'scheduled_for' => '2026-01-02 12:00:00',
+        ];
+
+        $this->wpdb->expects($this->once())
+            ->method('get_row')
+            ->willReturn((object) $refund_record);
+
+        // Act
+        $result = $this->repository->getRefundById($refund_id);
+
+        // Assert
+        $this->assertNotNull($result);
+        $this->assertEquals('REFUND-123', $result['refund_id']);
+        $this->assertEquals('PENDING', $result['status']);
+    }
+
+    /**
+     * Test retrieving non-existent refund returns null.
+     *
+     * @test
+     * @requirement REQ-ENTRY-FEE-PAYMENT-001
+     */
+    public function test_get_refund_by_id_not_found(): void
+    {
+        // Arrange
+        $this->wpdb->expects($this->once())
+            ->method('get_row')
+            ->willReturn(null);
+
+        // Act
+        $result = $this->repository->getRefundById('REFUND-NONEXISTENT');
+
+        // Assert
+        $this->assertNull($result);
+    }
+
+    /**
+     * Test retrieving failed refunds.
+     *
+     * @test
+     * @requirement REQ-ENTRY-FEE-PAYMENT-001
+     */
+    public function test_get_failed_refunds(): void
+    {
+        // Arrange
+        $failed_records = [
+            (object) [
+                'id' => 1,
+                'refund_id' => 'REFUND-FAIL-1',
+                'status' => 'FAILED',
+            ],
+            (object) [
+                'id' => 2,
+                'refund_id' => 'REFUND-FAIL-2',
+                'status' => 'FAILED',
+            ],
+        ];
+
+        $this->wpdb->expects($this->once())
+            ->method('get_results')
+            ->willReturn($failed_records);
+
+        // Act
+        $result = $this->repository->getFailedRefunds();
+
+        // Assert
+        $this->assertCount(2, $result);
+        $this->assertEquals('FAILED', $result[0]['status']);
+        $this->assertEquals('FAILED', $result[1]['status']);
+    }
+
+    /**
+     * Test pruning old authorization records.
      *
      * @test
      * @requirement REQ-ENTRY-FEE-PAYMENT-001

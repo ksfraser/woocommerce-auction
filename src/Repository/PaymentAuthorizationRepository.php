@@ -558,6 +558,53 @@ class PaymentAuthorizationRepository
     }
 
     /**
+     * Get refund by ID.
+     *
+     * @param string $refund_id Refund identifier
+     *
+     * @return array|null Refund record or null
+     *
+     * @requirement REQ-ENTRY-FEE-PAYMENT-001
+     */
+    public function getRefundById(string $refund_id): ?array
+    {
+        $result = $this->wpdb->get_row(
+            $this->wpdb->prepare(
+                "SELECT * FROM {$this->table_refunds} WHERE refund_id = %s",
+                $refund_id
+            ),
+            ARRAY_A
+        );
+
+        return $result ?: null;
+    }
+
+    /**
+     * Get failed refunds for investigation.
+     *
+     * @param int $limit Number of records
+     *
+     * @return array[] Failed refund records
+     *
+     * @requirement REQ-ENTRY-FEE-PAYMENT-001
+     */
+    public function getFailedRefunds(int $limit = 100): array
+    {
+        $results = $this->wpdb->get_results(
+            $this->wpdb->prepare(
+                "SELECT * FROM {$this->table_refunds} 
+                 WHERE status = 'FAILED'
+                 ORDER BY created_at DESC 
+                 LIMIT %d",
+                $limit
+            ),
+            ARRAY_A
+        );
+
+        return $results ?: [];
+    }
+
+    /**
      * Prune old authorization records (after sufficient audit period).
      *
      * Keeps authorization records for configured period (e.g., 90 days)
