@@ -1,0 +1,67 @@
+# YITH Auctions for WooCommerce
+
+> A comprehensive WooCommerce auction plugin with automatic bidding, proxy bids, sealed bids, and entry fees. Enterprise-grade architecture with 100% test coverage, SOLID principles, and production-ready implementation.
+
+## Documentation
+
+[IMPLEMENTATION_SUMMARY.md](IMPLEMENTATION_SUMMARY.md): Complete project status, metrics, and deployment readiness
+[ARCHITECTURE.md](docs/ARCHITECTURE.md): High-level system design with component interactions, workflows, and best practices
+[API_REFERENCE.md](docs/API_REFERENCE.md): Complete API documentation with method signatures, examples, and error handling
+[DB_SCHEMA.md](docs/DB_SCHEMA.md): Database design, optimization strategies, query patterns, and monitoring
+[REQUIREMENTS_TRACEABILITY_MATRIX.md](docs/REQUIREMENTS_TRACEABILITY_MATRIX.md): Requirement mapping to implementation and tests
+[PROJECT_STATUS_REPORT.md](docs/PROJECT_STATUS_REPORT.md): Comprehensive project status, QA results, deployment readiness
+[README.md](README.md): Plugin overview and quick start guide
+[AGENTS.md](AGENTS.md): Technical requirements and development standards
+[CONTRIBUTING.md](CONTRIBUTING.md): Development workflow and contribution guidelines
+
+## Phase 1: Performance Optimization & Async Processing
+
+[PHASE-1-TDD-WORKFLOW.md](docs/PHASE-1-TDD-WORKFLOW.md): TDD workflow guide with Red-Green-Refactor cycle, implementation checklist, and commands
+[phase-1-tdd-test-specification.md](plan/phase-1-tdd-test-specification.md): Complete TDD test specifications for all 7 Phase 1 tasks (97 unit tests, 25 integration tests, 5 performance benchmarks)
+[feature-auto-bidding-enhancements-1.md](plan/feature-auto-bidding-enhancements-1.md): Phase 1-5 implementation plan with requirements, task breakdown, dependencies, and timeline
+[tests/unit/BidQueueTest.php](tests/unit/BidQueueTest.php): RED phase tests for BidQueue service (18 failing tests ready for implementation)
+[EXCEPTION_PACKAGE.md](docs/EXCEPTION_PACKAGE.md): Complete exception hierarchy documentation (15+ exception classes, error codes, usage patterns)
+[src/Exceptions/](src/Exceptions/): Exception package with AuctionException base class and specialized exceptions for Queue, Proxy Bid, and Auction operations
+
+## Specifications & Requirements
+
+[Project Docs/](Project Docs/): Business requirements and functional specifications
+[spec/](spec/): Technical specifications and system designs
+[TESTING_INFRASTRUCTURE_PLAN.md](TESTING_INFRASTRUCTURE_PLAN.md): QA strategy and test plans
+[DOCKER-SETUP.md](DOCKER-SETUP.md): Development environment setup with Docker
+[LOCAL-RUNNER-SETUP.md](LOCAL-RUNNER-SETUP.md): Local development configuration
+
+## Implementation
+
+[includes/services/AutoBiddingEngine.php](includes/services/AutoBiddingEngine.php): Core orchestration service for automatic bidding
+[includes/services/ProxyBidService.php](includes/services/ProxyBidService.php): Proxy bid lifecycle management
+[includes/services/BidIncrementCalculator.php](includes/services/BidIncrementCalculator.php): Multiple bid increment strategies
+[includes/models/ProxyBid.php](includes/models/ProxyBid.php): Proxy bid entity with state management
+[includes/repositories/ProxyBidRepository.php](includes/repositories/ProxyBidRepository.php): Data access layer for proxy bids
+[includes/repositories/AutoBidLogRepository.php](includes/repositories/AutoBidLogRepository.php): Audit trail storage and retrieval
+[includes/migrations/](includes/migrations/): Database schema migrations for auto-bidding features
+
+## Testing
+
+[tests/unit/AutoBiddingEngineTest.php](tests/unit/AutoBiddingEngineTest.php): 15+ unit tests for engine orchestration
+[tests/unit/BidIncrementCalculatorTest.php](tests/unit/BidIncrementCalculatorTest.php): 20+ tests for bid increment strategies
+[tests/unit/ProxyBidServiceTest.php](tests/unit/ProxyBidServiceTest.php): 12+ tests for proxy bid operations
+[tests/integration/AutoBiddingIntegrationTest.php](tests/integration/AutoBiddingIntegrationTest.php): Complete workflow integration tests
+[tests/integration/ProxyBidValidationIntegrationTest.php](tests/integration/ProxyBidValidationIntegrationTest.php): Validation rule integration tests
+[tests/integration/BidServiceWorkflowIntegrationTest.php](tests/integration/BidServiceWorkflowIntegrationTest.php): Bid service workflow tests
+[phpunit.xml](phpunit.xml): PHPUnit configuration with coverage reporting
+
+## Configuration & Setup
+
+[composer.json](composer.json): PHP dependencies and package configuration
+[Dockerfile](Dockerfile): Docker image for development environment
+[docker-compose.yml](docker-compose.yml): Multi-container development stack
+[phpstan.neon](phpstan.neon): Static analysis configuration
+[phpcs.xml.dist](phpcs.xml.dist): Code style configuration
+[.env.example](.env.example): Environment variables template
+
+## Optional: Reference & History
+
+[CHANGELOG.md](CHANGELOG.md): Version history and release notes
+[PHASE-COMPLETION.md](PHASE-COMPLETION.md): Implementation phase checkpoints
+[PLUGIN_ARCHITECTURE_SUMMARY.md](PLUGIN_ARCHITECTURE_SUMMARY.md): Legacy architecture overview

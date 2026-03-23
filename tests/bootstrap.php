@@ -230,6 +230,66 @@ if ( ! function_exists( 'get_post_meta' ) ) {
             return $single ? '' : array();
         }
 
+        return $_test_post_meta[ $post_id ][ $key ];
+    }
+}
+
+// Redis stub interface and class for mocking
+if ( ! interface_exists( 'RedisInterface' ) ) {
+    interface RedisInterface
+    {
+        public function ping();
+        public function zAdd( $key, $score, $member );
+        public function zRange( $key, $start, $end );
+        public function zRem( $key, $member );
+        public function zCard( $key );
+        public function zScore( $key, $member );
+        public function hSet( $key, $field, $value );
+        public function hGet( $key, $field );
+        public function hDel( $key, $field );
+        public function lPush( $key, $value );
+        public function lRange( $key, $start, $end );
+        public function del( ...$keys );
+        public function expire( $key, $ttl );
+    }
+}
+
+if ( ! class_exists( 'Redis' ) ) {
+    class Redis implements RedisInterface
+    {
+        public function ping() { return true; }
+        public function zAdd( $key, $score, $member ) { return 1; }
+        public function zRange( $key, $start, $end ) { return array(); }
+        public function zRem( $key, $member ) { return 1; }
+        public function zCard( $key ) { return 0; }
+        public function zScore( $key, $member ) { return false; }
+        public function hSet( $key, $field, $value ) { return 1; }
+        public function hGet( $key, $field ) { return null; }
+        public function hDel( $key, $field ) { return 1; }
+        public function lPush( $key, $value ) { return 1; }
+        public function lRange( $key, $start, $end ) { return array(); }
+        public function del( ...$keys ) { return 1; }
+        public function expire( $key, $ttl ) { return 1; }
+    }
+}
+
+if ( ! class_exists( 'RedisException' ) ) {
+    class RedisException extends \Exception {}
+}
+
+if ( ! function_exists( 'get_post_meta' ) ) {
+    function get_post_meta( $post_id, $key = '', $single = false ) {
+        global $_test_post_meta;
+        $post_id = (int) $post_id;
+
+        if ( empty( $key ) ) {
+            return isset( $_test_post_meta[ $post_id ] ) ? $_test_post_meta[ $post_id ] : array();
+        }
+
+        if ( ! isset( $_test_post_meta[ $post_id ][ $key ] ) ) {
+            return $single ? '' : array();
+        }
+
         $values = $_test_post_meta[ $post_id ][ $key ];
 
         return $single ? $values[0] : $values;
