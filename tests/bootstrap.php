@@ -68,6 +68,13 @@ if ( ! class_exists( 'wpdb' ) ) {
         }
 
         public function query( $query ) {
+            // Handle TRUNCATE queries
+            if ( preg_match( '/TRUNCATE\s+TABLE\s+(\w+)$/is', $query, $matches ) ) {
+                $table = $matches[1];
+                $this->data_store[ $table ] = array();
+                return true;
+            }
+
             // Handle UPDATE queries
             if ( preg_match( '/UPDATE\s+(\w+)\s+SET\s+(.+?)\s+WHERE\s+(.+)$/is', $query, $matches ) ) {
                 $table = $matches[1];
@@ -107,6 +114,33 @@ if ( ! class_exists( 'wpdb' ) ) {
         }
 
         public function get_results( $query, $output = OBJECT ) {
+            // Handle COUNT(*) queries
+            if ( preg_match( '/SELECT\s+COUNT\(\*\)\s+FROM\s+(\w+)(.*)$/is', $query, $matches ) ) {
+                $table = $matches[1];
+                $rest = trim( $matches[2] ?? '' );
+                
+                if ( isset( $this->data_store[ $table ] ) ) {
+                    $results = $this->data_store[ $table ];
+                    
+                    // Parse WHERE conditions
+                    if ( ! empty( $rest ) && preg_match( '/WHERE\s+(.+?)(?:\s+ORDER|$)/is', $rest, $where_match ) ) {
+                        $where_clause = trim( $where_match[1] );
+                        $results = $this->filter_results( $results, $where_clause );
+                    }
+                    
+                    $count = count( $results );
+                    $result_row = array( 'COUNT(*)' => $count );
+                    
+                    if ( $output === 'ARRAY_A' || $output === ARRAY_A ) {
+                        return array( $result_row );
+                    } elseif ( $output === OBJECT ) {
+                        return array( (object) $result_row );
+                    }
+                    return array( $result_row );
+                }
+                return array();
+            }
+
             // Parse simple SELECT queries for testing
             if ( preg_match( '/SELECT \* FROM (\w+)(.*)$/is', $query, $matches ) ) {
                 $table = $matches[1];
