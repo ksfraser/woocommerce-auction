@@ -79,10 +79,16 @@ class MigrationRunner {
      * @return void
      */
     private function register_migrations(): void {
-        // Auto-bidding migrations (Phase 1)
+        // Auto-bidding migrations (Phase 4-A)
         $this->register( '1_4_0_create_proxy_bids_table', Migration_1_4_0_CreateProxyBidsTable::class );
         $this->register( '1_4_0_create_auto_audit_log', Migration_1_4_0_CreateAutoAuditLog::class );
         $this->register( '1_4_0_add_auto_bid_to_bids', Migration_1_4_0_AddAutoBidToBids::class );
+        
+        // Settlement & Payouts migrations (Phase 4-D)
+        $this->register( '4_0_0_create_settlement_batches', Migration_4_0_0_CreateSettlementBatches::class );
+        $this->register( '4_0_0_create_seller_payouts', Migration_4_0_0_CreateSellerPayouts::class );
+        $this->register( '4_0_0_create_payout_methods', Migration_4_0_0_CreatePayoutMethods::class );
+        $this->register( '4_0_0_create_commission_rules', Migration_4_0_0_CreateCommissionRules::class );
     }
     
     /**
