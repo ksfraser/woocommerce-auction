@@ -28,7 +28,7 @@
     ],
     "autoload": {
         "psr-4": {
-            "WC\\Auction\\": "src/",
+            "WC\\Auction\\": ["src/", "includes/"],
             "ksfraser\\": "src/ksfraser/"
         }
     },

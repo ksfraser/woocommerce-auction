@@ -31,40 +31,271 @@ if ( ! class_exists( 'wpdb' ) ) {
         public $base_prefix = 'wp_';
         public $last_error = '';
         public $insert_id = 0;
+        private $data_store = array(); // In-memory data store for tests
+        private $last_query = '';
 
         public function prepare( $query, ...$args ) {
-            return vsprintf( str_replace( '%s', "'%s'", str_replace( '%d', '%s', $query ) ), $args );
+            // Store for debugging
+            $this->last_query = $query;
+            
+            // Handle array or variadic args
+            if ( count( $args ) === 1 && is_array( $args[0] ) ) {
+                $args = $args[0];
+            }
+            
+            // Replace placeholders
+            $count = 0;
+            $result = preg_replace_callback(
+                '/(%d|%s|%f)/',
+                function( $matches ) use ( $args, &$count ) {
+                    if ( $count >= count( $args ) ) {
+                        return $matches[0];
+                    }
+                    $value = $args[ $count++ ];
+                    if ( $matches[0] === '%d' ) {
+                        return (int) $value;
+                    } elseif ( $matches[0] === '%s' ) {
+                        return "'" . addslashes( $value ) . "'";
+                    } elseif ( $matches[0] === '%f' ) {
+                        return (float) $value;
+                    }
+                    return $value;
+                },
+                $query
+            );
+            
+            return $result;
         }
 
         public function query( $query ) {
+            // Handle UPDATE queries
+            if ( preg_match( '/UPDATE\s+(\w+)\s+SET\s+(.+?)\s+WHERE\s+(.+)$/is', $query, $matches ) ) {
+                $table = $matches[1];
+                $set_clause = $matches[2];
+                $where_clause = $matches[3];
+                
+                if ( ! isset( $this->data_store[ $table ] ) ) {
+                    return 0;
+                }
+                
+                $updated = 0;
+                
+                // Parse SET clause (simple: column = value, column = value)
+                $set_parts = preg_split( '/\s*,\s*/', $set_clause );
+                $updates = array();
+                foreach ( $set_parts as $part ) {
+                    if ( preg_match( '/(\w+)\s*=\s*\'([^\']*)\'/', $part, $match ) ) {
+                        $updates[ $match[1] ] = $match[2];
+                    } elseif ( preg_match( '/(\w+)\s*=\s*(\d+)/', $part, $match ) ) {
+                        $updates[ $match[1] ] = (int) $match[2];
+                    }
+                }
+                
+                foreach ( $this->data_store[ $table ] as &$row ) {
+                    if ( $this->matches_where( $row, $where_clause ) ) {
+                        foreach ( $updates as $field => $value ) {
+                            $row[ $field ] = $value;
+                        }
+                        $updated++;
+                    }
+                }
+                
+                return $updated;
+            }
+            
             return true;
         }
 
         public function get_results( $query, $output = OBJECT ) {
+            // Parse simple SELECT queries for testing
+            if ( preg_match( '/SELECT \* FROM (\w+)(.*)$/is', $query, $matches ) ) {
+                $table = $matches[1];
+                $rest = trim( $matches[2] ?? '' );
+                
+                // Return mock data for testing
+                if ( isset( $this->data_store[ $table ] ) ) {
+                    $results = $this->data_store[ $table ];
+                    
+                    // Parse WHERE conditions
+                    if ( ! empty( $rest ) && preg_match( '/WHERE\s+(.+?)(?:\s+ORDER|$)/is', $rest, $where_match ) ) {
+                        $where_clause = trim( $where_match[1] );
+                        $results = $this->filter_results( $results, $where_clause );
+                    }
+                    
+                    // Convert output format if needed
+                    if ( $output === 'ARRAY_A' || $output === ARRAY_A ) {
+                        return $results;
+                    } elseif ( $output === OBJECT ) {
+                        return array_map( function( $row ) {
+                            return (object) $row;
+                        }, $results );
+                    }
+                    return $results;
+                }
+            }
             return array();
         }
 
         public function get_row( $query, $output = OBJECT, $y = 0 ) {
-            return null;
+            // Get results and return first row
+            $results = $this->get_results( $query, $output );
+            return ! empty( $results ) ? $results[0] : null;
         }
 
         public function get_var( $query, $x = 0, $y = 0 ) {
+            $row = $this->get_row( $query, ARRAY_A );
+            if ( $row ) {
+                $keys = array_keys( $row );
+                return $row[ $keys[ $x ] ] ?? null;
+            }
             return null;
         }
 
         public function insert( $table, $data, $format = null ) {
-            $this->insert_id = 1;
+            if ( ! isset( $this->data_store[ $table ] ) ) {
+                $this->data_store[ $table ] = array();
+            }
+            
+            $data['id'] = count( $this->data_store[ $table ] ) + 1;
+            $this->insert_id = $data['id'];
+            $this->data_store[ $table ][] = $data;
+            
             return 1;
         }
 
+        public function update( $table, $data, $where, $data_format = null, $where_format = null ) {
+            if ( ! isset( $this->data_store[ $table ] ) ) {
+                return 0;
+            }
+
+            $updated = 0;
+            foreach ( $this->data_store[ $table ] as &$row ) {
+                $matches = true;
+                foreach ( $where as $key => $value ) {
+                    if ( ! isset( $row[ $key ] ) || (string) $row[ $key ] !== (string) $value ) {
+                        $matches = false;
+                        break;
+                    }
+                }
+                
+                if ( $matches ) {
+                    foreach ( $data as $key => $value ) {
+                        $row[ $key ] = $value;
+                    }
+                    $updated++;
+                }
+            }
+            
+            return $updated;
+        }
+
         public function delete( $table, $where, $where_format = null ) {
-            return 1;
+            if ( ! isset( $this->data_store[ $table ] ) ) {
+                return 0;
+            }
+
+            $deleted = 0;
+            $this->data_store[ $table ] = array_filter(
+                $this->data_store[ $table ],
+                function( $row ) use ( $where, &$deleted ) {
+                    $matches = true;
+                    foreach ( $where as $key => $value ) {
+                        if ( ! isset( $row[ $key ] ) || (string) $row[ $key ] !== (string) $value ) {
+                            $matches = false;
+                            break;
+                        }
+                    }
+                    if ( $matches ) {
+                        $deleted++;
+                        return false; // Remove from array
+                    }
+                    return true; // Keep in array
+                }
+            );
+
+            return $deleted;
+        }
+
+        /**
+         * Filter results based on WHERE clause
+         *
+         * @param array  $results Results to filter
+         * @param string $where_clause WHERE clause from query
+         * @return array Filtered results
+         */
+        private function filter_results( $results, $where_clause ) {
+            $filtered = array();
+            
+            foreach ( $results as $row ) {
+                if ( $this->matches_where( $row, $where_clause ) ) {
+                    $filtered[] = $row;
+                }
+            }
+            
+            return $filtered;
+        }
+
+        /**
+         * Check if row matches WHERE clause
+         *
+         * @param array  $row Row from results
+         * @param string $where_clause WHERE clause to match
+         * @return bool True if row matches
+         */
+        private function matches_where( $row, $where_clause ) {
+            // Parse multiple conditions with AND/OR
+            // For now, simple AND support
+            $parts = preg_split( '/\s+AND\s+/i', $where_clause );
+            
+            foreach ( $parts as $part ) {
+                $part = trim( $part );
+                
+                if ( preg_match( '/(\w+)\s*=\s*\'([^\']*)\'/i', $part, $match ) ) {
+                    $field = $match[1];
+                    $value = $match[2];
+                    
+                    if ( ! isset( $row[ $field ] ) || (string) $row[ $field ] !== $value ) {
+                        return false;
+                    }
+                } elseif ( preg_match( '/(\w+)\s*=\s*(\d+)/i', $part, $match ) ) {
+                    $field = $match[1];
+                    $value = (int) $match[2];
+                    
+                    if ( ! isset( $row[ $field ] ) || (int) $row[ $field ] !== $value ) {
+                        return false;
+                    }
+                } elseif ( preg_match( '/(\w+)\s*>=\s*\'([^\']*)\'/i', $part, $match ) ) {
+                    $field = $match[1];
+                    $value = $match[2];
+                    
+                    if ( ! isset( $row[ $field ] ) || (string) $row[ $field ] < $value ) {
+                        return false;
+                    }
+                } elseif ( preg_match( '/(\w+)\s*<=\s*\'([^\']*)\'/i', $part, $match ) ) {
+                    $field = $match[1];
+                    $value = $match[2];
+                    
+                    if ( ! isset( $row[ $field ] ) || (string) $row[ $field ] > $value ) {
+                        return false;
+                    }
+                }
+            }
+            
+            return true;
         }
     }
 }
 
 if ( ! defined( 'OBJECT' ) ) {
     define( 'OBJECT', 'OBJECT' );
+}
+
+if ( ! defined( 'ARRAY_A' ) ) {
+    define( 'ARRAY_A', 'ARRAY_A' );
+}
+
+if ( ! defined( 'ARRAY_N' ) ) {
+    define( 'ARRAY_N', 'ARRAY_N' );
 }
 
 global $wpdb;
