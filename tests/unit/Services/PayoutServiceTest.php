@@ -166,11 +166,6 @@ class PayoutServiceTest extends TestCase {
 
         // Act
         $this->service->initiateSellerPayout( $batch, 1, $amount_cents, 'METHOD_PAYPAL' );
-
-        // Assert
-        $this->factory->expects( $this->once() )
-            ->method( 'getAdapter' )
-            ->with( 'METHOD_PAYPAL' );
     }
 
     /**
@@ -199,13 +194,12 @@ class PayoutServiceTest extends TestCase {
             )
             ->willReturn( $this->createTransactionResult() );
 
-        $this->factory->method( 'getAdapter' )->willReturn( $adapter );
+        $this->factory->expects( $this->once() )
+            ->method( 'getAdapter' )
+            ->willReturn( $adapter );
 
         // Act
         $this->service->initiateSellerPayout( $batch, 1, $amount_cents, 'METHOD_ACH' );
-
-        // Assert adapter was called
-        $adapter->expects( $this->once() )->method( 'initiatePayment' );
     }
 
     /**
@@ -341,10 +335,10 @@ class PayoutServiceTest extends TestCase {
             ->with( $this->isInstanceOf( SellerPayout::class ) );
 
         // Act
-        $this->service->getPayoutStatus( 1 );
+        $status = $this->service->getPayoutStatus( 1 );
 
-        // Assert payout was updated
-        $this->repository->expects( $this->once() )->method( 'update' );
+        // Assert
+        $this->assertEquals( TransactionResult::STATUS_COMPLETED, $status );
     }
 
     /**
@@ -373,17 +367,16 @@ class PayoutServiceTest extends TestCase {
             ->willReturnOnConsecutiveCalls( 1, 2, 3 );
 
         $adapter = $this->createMock( IPaymentProcessorAdapter::class );
-        $adapter->method( 'getProcessorName' )->willReturn( 'Square' );
-        $adapter->method( 'initiatePayment' )
+        $adapter->expects( $this->exactly( 3 ) )
+            ->method( 'initiatePayment' )
             ->willReturn( $this->createTransactionResult() );
 
-        $this->factory->method( 'getAdapter' )->willReturn( $adapter );
+        $this->factory->expects( $this->exactly( 3 ) )
+            ->method( 'getAdapter' )
+            ->willReturn( $adapter );
 
         // Act
         $this->service->processPayoutBatch( $batch );
-
-        // Assert all 3 were processed
-        $this->repository->expects( $this->exactly( 3 ) )->method( 'save' );
     }
 
     /**
@@ -404,6 +397,7 @@ class PayoutServiceTest extends TestCase {
 
         $this->repository->expects( $this->once() )
             ->method( 'findByBatch' )
+            ->with( 1 )
             ->willReturn( $payouts );
 
         $this->repository->expects( $this->once() )
@@ -411,17 +405,16 @@ class PayoutServiceTest extends TestCase {
             ->willReturn( 1 );
 
         $adapter = $this->createMock( IPaymentProcessorAdapter::class );
-        $adapter->method( 'getProcessorName' )->willReturn( 'Square' );
-        $adapter->method( 'initiatePayment' )
+        $adapter->expects( $this->once() )
+            ->method( 'initiatePayment' )
             ->willReturn( $this->createTransactionResult() );
 
-        $this->factory->method( 'getAdapter' )->willReturn( $adapter );
+        $this->factory->expects( $this->once() )
+            ->method( 'getAdapter' )
+            ->willReturn( $adapter );
 
         // Act
         $this->service->processPayoutBatch( $batch );
-
-        // Assert only 1 was saved (only PENDING)
-        $this->repository->expects( $this->once() )->method( 'save' );
     }
 
     /**
@@ -482,7 +475,7 @@ class PayoutServiceTest extends TestCase {
         $adapter = $this->createMock( IPaymentProcessorAdapter::class );
         $adapter->method( 'getProcessorName' )->willReturn( 'Square' );
         $adapter->method( 'initiatePayment' )
-            ->willReturn( $this->createTransactionResult() );
+            ->willReturn( $this->createTransactionResult( TransactionResult::STATUS_PROCESSING ) );
 
         $this->factory->method( 'getAdapter' )->willReturn( $adapter );
 

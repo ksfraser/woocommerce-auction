@@ -274,6 +274,7 @@ class PayoutService {
                 $payout->setProcessorFeesCents( $transaction_result->getProcessorFeesCents() );
                 $payout->setNetPayoutCents( $transaction_result->getNetPayoutCents() );
                 $payout->setStatus( $transaction_result->getStatus() );
+                // Always save in batch processing
                 $this->repository->save( $payout );
                 $processed++;
 
