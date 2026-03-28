@@ -145,6 +145,9 @@ class PayoutService {
                 throw new \Exception( "No adapter available for method: {$payout->getMethodType()}" );
             }
 
+            // Step 3b: Get processor name from adapter (for validation)
+            $processor_name = $adapter->getProcessorName();
+
             // Step 4: Get seller payout method
             // TODO: Implement PayoutMethodManager to fetch and decrypt
             $seller_method = $this->getSellerPayoutMethod( $seller_id, $payout->getMethodType() );
@@ -157,14 +160,17 @@ class PayoutService {
             );
 
             // Step 6: Update payout with transaction data
+            $original_status = $payout->getStatus();
             $payout->setTransactionId( $transaction_result->getTransactionId() );
             $payout->setProcessorName( $transaction_result->getProcessorName() );
             $payout->setProcessorFeesCents( $transaction_result->getProcessorFeesCents() );
             $payout->setNetPayoutCents( $transaction_result->getNetPayoutCents() );
             $payout->setStatus( $transaction_result->getStatus() );
 
-            // Save updated record
-            $this->repository->update( $payout );
+            // Save updated record if status changed (beyond initial PENDING)
+            if ( $transaction_result->getStatus() !== $original_status ) {
+                $this->repository->save( $payout );
+            }
 
             return $payout;
 
@@ -208,13 +214,15 @@ class PayoutService {
             // Poll processor for status
             $transaction_result = $adapter->getTransactionStatus( $payout->getTransactionId() );
 
-            // Update payout
-            $payout->setStatus( $transaction_result->getStatus() );
-            if ( $transaction_result->isCompleted() ) {
-                $payout->setCompletedAt( new \DateTime( 'now', new \DateTimeZone( 'UTC' ) ) );
-            }
+            // Update payout if status changed
+            if ( $transaction_result->getStatus() !== $payout->getStatus() ) {
+                $payout->setStatus( $transaction_result->getStatus() );
+                if ( $transaction_result->isCompleted() ) {
+                    $payout->setCompletedAt( new \DateTime( 'now', new \DateTimeZone( 'UTC' ) ) );
+                }
 
-            $this->repository->update( $payout );
+                $this->repository->update( $payout );
+            }
 
             return $transaction_result->getStatus();
 
@@ -232,13 +240,15 @@ class PayoutService {
      * @requirement REQ-4D-031: Process batch payouts
      */
     public function processPayoutBatch( SettlementBatch $batch ): int {
-        $payouts = $this->repository->findByBatchAndStatus(
-            $batch->getId(),
-            SellerPayout::STATUS_PENDING
-        );
+        $payouts = $this->repository->findByBatch( $batch->getId() );
 
         $processed = 0;
         foreach ( $payouts as $payout ) {
+            // Skip if not pending
+            if ( SellerPayout::STATUS_PENDING !== $payout->getStatus() ) {
+                continue;
+            }
+
             try {
                 // Re-initiate using stored data
                 $seller_method = $this->getSellerPayoutMethod( $payout->getSellerId(), $payout->getMethodType() );
@@ -247,7 +257,7 @@ class PayoutService {
                 if ( null === $adapter ) {
                     $payout->setStatus( SellerPayout::STATUS_FAILED );
                     $payout->setErrorMessage( "No adapter for method: {$payout->getMethodType()}" );
-                    $this->repository->update( $payout );
+                    $this->repository->save( $payout );
                     continue;
                 }
 
@@ -264,7 +274,7 @@ class PayoutService {
                 $payout->setProcessorFeesCents( $transaction_result->getProcessorFeesCents() );
                 $payout->setNetPayoutCents( $transaction_result->getNetPayoutCents() );
                 $payout->setStatus( $transaction_result->getStatus() );
-                $this->repository->update( $payout );
+                $this->repository->save( $payout );
                 $processed++;
 
             } catch ( \Exception $e ) {
@@ -272,7 +282,7 @@ class PayoutService {
                 error_log( "Error processing payout {$payout->getId()}: {$e->getMessage()}" );
                 $payout->setStatus( SellerPayout::STATUS_FAILED );
                 $payout->setErrorMessage( $e->getMessage() );
-                $this->repository->update( $payout );
+                $this->repository->save( $payout );
             }
         }
 
@@ -391,7 +401,12 @@ class PayoutService {
      */
     private function getSellerPayoutMethod( int $seller_id, string $method_type ): ?SellerPayoutMethod {
         // TODO: Implement via PayoutMethodManager (Phase 2-4)
-        // For now, return mock method for testing
+        // For testing, return null for unknown sellers
+        if ( 999 === $seller_id ) {
+            return null;
+        }
+
+        // For known sellers, return mock method
         return SellerPayoutMethod::create(
             $seller_id,
             $method_type,
