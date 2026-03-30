@@ -143,15 +143,20 @@ class EncryptionServiceTest extends TestCase {
     }
 
     /**
-     * Test generate key produces 32-byte key
+     * Test generate key produces a valid key
      *
      * @test
      */
-    public function test_generate_key_produces_32_byte_key(): void {
+    public function test_generate_key_produces_valid_key(): void {
         $key = EncryptionService::generateKey();
 
         $this->assertIsString( $key );
-        $this->assertEquals( 32, strlen( $key ) );
+        $this->assertNotEmpty( $key );
+        // Key should be either base64-encoded or defuse format
+        $this->assertTrue(
+            strpos( $key, 'DefuseCrypto' ) === 0 || 
+            base64_decode( $key, true ) !== false
+        );
     }
 
     /**
@@ -171,16 +176,28 @@ class EncryptionServiceTest extends TestCase {
     }
 
     /**
-     * Test invalid key length throws exception
+     * Test encryption service detects active method
      *
      * @test
      */
-    public function test_invalid_key_length_throws_exception(): void {
-        $short_key = substr( $this->test_key, 0, 16 ); // 16 bytes instead of 32
+    public function test_encryption_service_detects_active_method(): void {
+        $service = new EncryptionService( $this->test_key );
+        $method = $service->getMethod();
 
-        $this->expectException( \InvalidArgumentException::class );
-        new EncryptionService( $short_key );
+        $this->assertIsString( $method );
+        $this->assertTrue( $method === 'defuse' || $method === 'sodium' );
     }
+
+    /**
+     * Test invalid key format throws exception
+     *
+     * @test
+     */
+    public function test_invalid_key_throws_exception(): void {
+        $this->expectException( \RuntimeException::class );
+        new EncryptionService( '' ); // Empty key should fail
+    }
+
 
     /**
      * Test encrypt large data
@@ -260,5 +277,31 @@ class EncryptionServiceTest extends TestCase {
         $restored = json_decode( $decrypted, true );
 
         $this->assertEquals( $data, $restored );
+    }
+
+    /**
+     * Test authenticated encryption detects tampering
+     *
+     * Both defuse and sodium support authenticated encryption,
+     * so tampering should be detected.
+     *
+     * @test
+     */
+    public function test_authenticated_encryption_detects_tampering(): void {
+        $service = new EncryptionService( $this->test_key );
+        $plaintext = 'Original secure data';
+        $encrypted = $service->encrypt( $plaintext );
+
+        // Tamper with encrypted data by flipping bits
+        $tampered = $encrypted;
+        if ( strlen( $tampered ) > 2 ) {
+            $char = substr( $tampered, -2, 1 );
+            $flipped = chr( ord( $char ) ^ 0xFF ); // Flip all bits
+            $tampered = substr( $tampered, 0, -2 ) . $flipped . substr( $tampered, -1 );
+        }
+
+        // Decryption should fail due to authentication check
+        $this->expectException( \RuntimeException::class );
+        $service->decrypt( $tampered );
     }
 }

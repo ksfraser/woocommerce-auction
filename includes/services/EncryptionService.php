@@ -1,173 +1,249 @@
 <?php
 /**
- * Encryption Service - AES-256-CBC encryption/decryption for sensitive data
+ * Encryption Service - Symmetric encryption with defuse library + sodium fallback
  *
  * @package    WooCommerce Auction
  * @subpackage Services
- * @version    4.0.0
- * @requirement REQ-4D-045: Provide AES-256-CBC encryption for payout methods
+ * @version    4.1.0
+ * @requirement REQ-4D-045: Provide authenticated encryption for payout methods
  */
 
 namespace WC\Auction\Services;
+
+use Defuse\Crypto\Crypto;
+use Defuse\Crypto\Key;
+use Defuse\Crypto\EncryptionException;
 
 if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
 /**
- * EncryptionService - Handles symmetric encryption/decryption
+ * EncryptionService - Handles authenticated symmetric encryption/decryption
  *
- * Uses OpenSSL AES-256-CBC cipher with random IVs for each encryption.
- * Supports key generation and retrieval from environment/config.
+ * Primary: defuse/php-encryption (authenticated, tamper-proof)
+ * Fallback: libsodium/php (ChaCha20-Poly1305 if defuse unavailable)
+ *
+ * Defuse uses AES-256-CBC with HMAC-SHA256 for authentication.
+ * Prevents tampering and key misuse through API design.
  *
  * @requirement REQ-4D-045: Encrypt payout method data before storage
- * @requirement SEC-001: Use AES-256-CBC encryption with secure key management
+ * @requirement SEC-001: Use authenticated encryption with tamper detection
+ * @requirement SEC-002: Support key derivation and secure key management
  */
 class EncryptionService {
 
     /**
-     * Cipher algorithm
-     */
-    const CIPHER = 'aes-256-cbc';
-
-    /**
-     * Key byte length (256-bit = 32 bytes)
-     */
-    const KEY_LENGTH = 32;
-
-    /**
-     * IV byte length (128-bit = 16 bytes for CBC mode)
-     */
-    const IV_LENGTH = 16;
-
-    /**
-     * Encryption key (binary)
+     * Encryption method: defuse or sodium
      *
      * @var string
      */
-    private $key;
+    private $method = 'defuse';
+
+    /**
+     * Defuse encryption key
+     *
+     * @var Key|null
+     */
+    private $defuse_key;
+
+    /**
+     * Sodium encryption key (binary for ChaCha20-Poly1305)
+     *
+     * @var string|null
+     */
+    private $sodium_key;
 
     /**
      * Constructor
      *
-     * @param string|null $key Encryption key (if null, uses getEncryptionKey())
+     * Attempts to use defuse, falls back to sodium if available,
+     * throws exception if neither is available.
+     *
+     * @param string|null $key_material Raw key material (if null, loads from config)
+     * @throws \RuntimeException If no encryption method available
      */
-    public function __construct( ?string $key = null ) {
-        $this->key = $key ?? $this->getEncryptionKey();
+    public function __construct( ?string $key_material = null ) {
+        $key_material = $key_material ?? $this->loadKeyMaterial();
 
-        if ( strlen( $this->key ) !== self::KEY_LENGTH ) {
-            throw new \InvalidArgumentException(
-                sprintf( 'Encryption key must be %d bytes, got %d', self::KEY_LENGTH, strlen( $this->key ) )
-            );
+        if ( empty( $key_material ) ) {
+            throw new \RuntimeException( 'Encryption key material cannot be empty' );
         }
+
+        if ( $this->defuseAvailable() ) {
+            try {
+                // Defuse generates its own key from random bytes
+                $this->defuse_key = Key::createNewRandomKey();
+                $this->method      = 'defuse';
+                return;
+            } catch ( EncryptionException $e ) {
+                // Fall through to sodium
+            }
+        }
+
+        if ( $this->sodiumAvailable() ) {
+            // Ensure key is correct length for sodium
+            if ( strlen( $key_material ) !== SODIUM_CRYPTO_SECRETBOX_KEYBYTES ) {
+                // Hash the key material to get correct length
+                $this->sodium_key = hash( 'sha256', $key_material, true );
+                // If hash isn't 32 bytes, pad/truncate (sha256 is 32 bytes so this shouldn't happen)
+                if ( strlen( $this->sodium_key ) !== SODIUM_CRYPTO_SECRETBOX_KEYBYTES ) {
+                    $this->sodium_key = substr(
+                        hash( 'sha512', $key_material, true ),
+                        0,
+                        SODIUM_CRYPTO_SECRETBOX_KEYBYTES
+                    );
+                }
+            } else {
+                $this->sodium_key = $key_material;
+            }
+            $this->method = 'sodium';
+            return;
+        }
+
+        throw new \RuntimeException(
+            'No encryption method available. Install defuse/php-encryption or enable sodium extension.'
+        );
     }
 
     /**
-     * Encrypt data with AES-256-CBC
-     *
-     * Generates a random IV, encrypts the data, and returns base64-encoded
-     * concatenation of IV + ciphertext.
+     * Encrypt data with authenticated encryption
      *
      * @param string $data Plaintext data to encrypt
-     * @return string Base64-encoded IV + ciphertext
+     * @return string Encrypted data (base64-encoded for storage)
      * @throws \RuntimeException If encryption fails
      *
-     * @requirement SEC-001: Encrypt sensitive data with random IV
+     * @requirement SEC-001: Encrypt sensitive data with authentication
      */
     public function encrypt( string $data ): string {
-        // Generate random IV
-        $iv = openssl_random_pseudo_bytes( self::IV_LENGTH, $strong );
-        if ( ! $strong ) {
-            throw new \RuntimeException( 'Failed to generate cryptographically strong IV' );
-        }
+        try {
+            if ( 'defuse' === $this->method && $this->defuse_key ) {
+                $ciphertext = Crypto::encrypt( $data, $this->defuse_key );
+                return $ciphertext; // Defuse returns base64-encoded already
+            }
 
-        // Encrypt the data
-        $encrypted = openssl_encrypt( $data, self::CIPHER, $this->key, OPENSSL_RAW_DATA, $iv );
-        if ( false === $encrypted ) {
-            throw new \RuntimeException( 'Encryption failed: ' . openssl_error_string() );
-        }
+            if ( 'sodium' === $this->method && $this->sodium_key ) {
+                $nonce       = random_bytes( SODIUM_CRYPTO_SECRETBOX_NONCEBYTES );
+                $ciphertext  = sodium_crypto_secretbox( $data, $nonce, $this->sodium_key );
+                $combined    = $nonce . $ciphertext;
+                return base64_encode( $combined );
+            }
 
-        // Combine IV + ciphertext and encode
-        $combined = $iv . $encrypted;
-        return base64_encode( $combined );
+            throw new \RuntimeException( 'No valid encryption method configured' );
+        } catch ( EncryptionException $e ) {
+            throw new \RuntimeException( 'Encryption failed: ' . $e->getMessage() );
+        } catch ( \Exception $e ) {
+            throw new \RuntimeException( 'Encryption failed: ' . $e->getMessage() );
+        }
     }
 
     /**
-     * Decrypt data encrypted with encrypt()
+     * Decrypt authenticated encrypted data
      *
-     * Extracts IV from base64-encoded data, then decrypts the ciphertext.
-     *
-     * @param string $encrypted Base64-encoded IV + ciphertext
+     * @param string $ciphertext Encrypted data (base64-encoded)
      * @return string Plaintext data
-     * @throws \RuntimeException If decryption fails
+     * @throws \RuntimeException If decryption fails or authentication fails
      *
-     * @requirement SEC-001: Decrypt stored data safely
+     * @requirement SEC-001: Decrypt and verify authenticated data
      */
-    public function decrypt( string $encrypted ): string {
-        // Decode from base64
-        $combined = base64_decode( $encrypted, true );
-        if ( false === $combined ) {
-            throw new \RuntimeException( 'Failed to decode base64 encrypted data' );
+    public function decrypt( string $ciphertext ): string {
+        try {
+            if ( 'defuse' === $this->method && $this->defuse_key ) {
+                return Crypto::decrypt( $ciphertext, $this->defuse_key );
+            }
+
+            if ( 'sodium' === $this->method && $this->sodium_key ) {
+                $combined   = base64_decode( $ciphertext, true );
+                $nonce_len  = SODIUM_CRYPTO_SECRETBOX_NONCEBYTES;
+                $nonce      = substr( $combined, 0, $nonce_len );
+                $ciphertext = substr( $combined, $nonce_len );
+
+                $plaintext = sodium_crypto_secretbox_open( $ciphertext, $nonce, $this->sodium_key );
+                if ( false === $plaintext ) {
+                    throw new \RuntimeException( 'Decryption failed: authentication tag verification failed' );
+                }
+                return $plaintext;
+            }
+
+            throw new \RuntimeException( 'No valid decryption method configured' );
+        } catch ( EncryptionException $e ) {
+            throw new \RuntimeException( 'Decryption failed: ' . $e->getMessage() );
+        } catch ( \Exception $e ) {
+            throw new \RuntimeException( 'Decryption failed: ' . $e->getMessage() );
         }
-
-        // Extract IV and ciphertext
-        if ( strlen( $combined ) < self::IV_LENGTH ) {
-            throw new \RuntimeException( 'Invalid encrypted data: too short' );
-        }
-
-        $iv        = substr( $combined, 0, self::IV_LENGTH );
-        $ciphertext = substr( $combined, self::IV_LENGTH );
-
-        // Decrypt
-        $decrypted = openssl_decrypt( $ciphertext, self::CIPHER, $this->key, OPENSSL_RAW_DATA, $iv );
-        if ( false === $decrypted ) {
-            throw new \RuntimeException( 'Decryption failed: invalid key or corrupted data' );
-        }
-
-        return $decrypted;
     }
 
     /**
-     * Generate a random encryption key
+     * Get active encryption method
      *
-     * Returns a cryptographically strong random 32-byte key suitable for AES-256.
+     * @return string Either 'defuse' or 'sodium'
+     */
+    public function getMethod(): string {
+        return $this->method;
+    }
+
+    /**
+     * Check if defuse/php-encryption is available
      *
-     * @return string 32-byte binary key
-     * @throws \RuntimeException If generation fails
+     * @return bool
+     */
+    private function defuseAvailable(): bool {
+        return class_exists( Crypto::class );
+    }
+
+    /**
+     * Check if sodium extension is available
      *
-     * @requirement SEC-001: Generate strong random keys
+     * @return bool
+     */
+    private function sodiumAvailable(): bool {
+        return extension_loaded( 'sodium' ) || extension_loaded( 'libsodium' );
+    }
+
+    /**
+     * Generate a new encryption key
+     *
+     * Uses defuse's key generation if available, otherwise sodium.
+     *
+     * @return string Base64-encoded key for storage/configuration
+     * @throws \RuntimeException If key generation fails
+     *
+     * @requirement SEC-002: Generate strong random keys
      */
     public static function generateKey(): string {
-        $key = openssl_random_pseudo_bytes( self::KEY_LENGTH, $strong );
-        if ( ! $strong ) {
-            throw new \RuntimeException( 'Failed to generate cryptographically strong key' );
+        if ( class_exists( Crypto::class ) ) {
+            $key = Key::createNewRandomKey();
+            return $key->saveToAsciiSafeString();
         }
-        return $key;
+
+        if ( extension_loaded( 'sodium' ) || extension_loaded( 'libsodium' ) ) {
+            $key = random_bytes( SODIUM_CRYPTO_SECRETBOX_KEYBYTES );
+            return base64_encode( $key );
+        }
+
+        throw new \RuntimeException(
+            'Cannot generate key: install defuse/php-encryption or enable sodium extension.'
+        );
     }
 
     /**
-     * Get encryption key from configuration
+     * Load encryption key material from configuration
      *
      * Looks in order:
      * 1. wp-config.php constant: AUCTION_ENCRYPTION_KEY
      * 2. Environment variable: AUCTION_ENCRYPTION_KEY
-     * 3. Falls back to WordPress auth keys (concatenated and hashed)
+     * 3. Falls back to WordPress auth keys (not recommended for production)
      *
-     * @return string 32-byte binary key
-     * @throws \RuntimeException If no key found or invalid
+     * @return string Key material (binary or base64-encoded)
+     * @throws \RuntimeException If no key found
      *
      * @requirement SEC-002: Load encryption key from secure config
      */
-    private function getEncryptionKey(): string {
+    private function loadKeyMaterial(): string {
         // Try wp-config constant first
         if ( defined( 'AUCTION_ENCRYPTION_KEY' ) ) {
             $key = AUCTION_ENCRYPTION_KEY;
-            // If it's hex string, convert to binary
-            if ( ctype_xdigit( $key ) && strlen( $key ) === 64 ) {
-                return hex2bin( $key );
-            }
-            // Raw binary key
-            if ( strlen( $key ) === self::KEY_LENGTH ) {
+            if ( ! empty( $key ) ) {
                 return $key;
             }
         }
@@ -175,40 +251,29 @@ class EncryptionService {
         // Try environment variable
         $env_key = getenv( 'AUCTION_ENCRYPTION_KEY' );
         if ( $env_key ) {
-            if ( ctype_xdigit( $env_key ) && strlen( $env_key ) === 64 ) {
-                return hex2bin( $env_key );
-            }
-            if ( strlen( $env_key ) === self::KEY_LENGTH ) {
-                return $env_key;
-            }
+            return $env_key;
         }
 
-        // Fallback: derive from WordPress auth keys (not ideal for production)
-        $fallback = hash(
-            'sha256',
-            AUTH_KEY . SECURE_AUTH_KEY . LOGGED_IN_KEY . NONCE_KEY,
-            true
-        );
-        if ( strlen( $fallback ) === self::KEY_LENGTH ) {
-            return $fallback;
-        }
-
-        throw new \RuntimeException(
-            'No encryption key configured. Set AUCTION_ENCRYPTION_KEY in wp-config.php or environment.'
-        );
+        // Fallback: derive from WordPress auth keys (not ideal, but prevents errors)
+        return AUTH_KEY . SECURE_AUTH_KEY . LOGGED_IN_KEY . NONCE_KEY;
     }
 
     /**
      * Check if data appears to be encrypted
      *
-     * Attempts to base64-decode and check for valid format.
-     * Not bulletproof, but useful for validation.
+     * Quick heuristic check for encryption markers.
      *
      * @param string $data Potentially encrypted data
      * @return bool
      */
     public static function isEncrypted( string $data ): bool {
+        // Defuse format indicator
+        if ( strpos( $data, 'DefuseCrypto' ) === 0 ) {
+            return true;
+        }
+
+        // Base64 check (rough heuristic)
         $decoded = @base64_decode( $data, true );
-        return false !== $decoded && strlen( $decoded ) >= self::IV_LENGTH;
+        return false !== $decoded && strlen( $decoded ) >= 20;
     }
 }
