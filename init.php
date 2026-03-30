@@ -113,3 +113,20 @@ function yith_wcact_init() {
 }
 
 add_action( 'yith_wcact_init', 'yith_wcact_init' );
+
+/**
+ * Initialize encryption during plugin setup
+ *
+ * Generates encryption keys on first activation and ensures
+ * the encryption service is available for secure operations.
+ *
+ * @requirement REQ-4D-045: Initialize encryption on plugin install
+ * @requirement SEC-002: Set up encryption key management
+ */
+if ( ! function_exists( 'yith_wcact_init_encryption' ) ) {
+    function yith_wcact_init_encryption() {
+        require_once YITH_WCACT_PATH . 'includes/services/EncryptionInstaller.php';
+        \WC\Auction\Services\EncryptionInstaller::install();
+    }
+    add_action( 'yith_wcact_init', 'yith_wcact_init_encryption', 5 );
+}
