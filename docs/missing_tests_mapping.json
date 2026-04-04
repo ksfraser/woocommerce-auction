@@ -1,0 +1,1494 @@
+{
+  "REQ-004": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-005": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-006": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-024": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-024-": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-025": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-025-": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-026": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-026-": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-027": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-027-": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-028": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-028-": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-029": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-029-": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-030": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-030-": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-123": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-4C-S3-009": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-4C-S3-010": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-4D-001": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-4D-002": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-4D-003": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-4D-004": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-4D-005": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-4D-006": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-4D-007": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-4D-008": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-4D-009": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-4D-010": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-4D-025": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-4D-026": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-4D-027": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-4D-028": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-4D-042": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-4D-043": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-4D-044": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-4D-2-4": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-4E-003": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-4E-004": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-4E-006": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-4E-009": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-A-001": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-AB": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-AB-": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-AB-009": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-AUCTION-UI-001": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-AUTO-001-009": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-AUTO-008": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-AUTO-BID-CONCURRENCY-001": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-AUTO-BID-DB-001": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-AUTO-BID-QUERY-001": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-AUTO-BID-QUEUE-001": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-AUTO-BID-REPOSITORY-001": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-AUTO-BID-STATUS-001": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-BID": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-BID-": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-BID-API": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-BRD-001": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-BRD-1001": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-BRD-101": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-BRD-102": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-BRD-103": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-BRD-104": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-BRD-105": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-BRD-201": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-BRD-202": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-BRD-203": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-BRD-204": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-BRD-205": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-BRD-206": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-BRD-301": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-BRD-302": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-BRD-303": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-BRD-304": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-BRD-401": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-BRD-402": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-BRD-403": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-BRD-501": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-BRD-502": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-BRD-503": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-BRD-601": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-BRD-602": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-BRD-701": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-BRD-702": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-BRD-801": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-BRD-802": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-BRD-803": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-BRD-804": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-BRD-805": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-BRD-901": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-C-001": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-C-002": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-C-003": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-C-004": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-C-005": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-C-006": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-C-007": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-C-008": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-C-009": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-C-010": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-C-011": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-C-012": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-C-013": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-C-014": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-C-015": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-CART-002": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-CART-003": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-CART-004": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-COMMISSION-DATABASE-001": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-COMMISSION-STORAGE-001": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-COMMISSION-TRANSACTION-001": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-CORE-008": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-CORE-009": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-D-001": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-DASHBOARD-ADMIN-001": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-DASHBOARD-ADMIN-002": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-DASHBOARD-ADMIN-003": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-DASHBOARD-ADMIN-004": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-DASHBOARD-ADMIN-005": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-DASHBOARD-BATCH-001-002": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-DASHBOARD-BATCH-002": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-DASHBOARD-REPORTS-001-003": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-DASHBOARD-REPORTS-002": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-DASHBOARD-REPORTS-003": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-DASHBOARD-SELLER-001-004": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-DASHBOARD-SELLER-002": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-DASHBOARD-SELLER-003": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-DASHBOARD-SELLER-004": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-DASHBOARD-SELLER-PAYOUT-001": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-DASHBOARD-SELLER-PAYOUT-002": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-DASHBOARD-SELLER-PAYOUT-003": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-DB-MIGRATIONS-001": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-DOMAIN-AUCTION-STATUS-001": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-DOMAIN-MONEY-001": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-ENTRY-FEE-COMMISSION-001": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-ENTRY-FEE-DATABASE-001": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-ENTRY-FEE-STORAGE-001": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-ENTRY-FEE-VALIDATION-001": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-FEE-AUDIT-TRAIL-001": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-FRD-001": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-FRD-101": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-FRD-102": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-FRD-103": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-FRD-104": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-FRD-105": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-FRD-201": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-FRD-201-AC": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-FRD-202": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-FRD-202-AC": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-FRD-203": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-FRD-203-AC": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-FRD-204": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-FRD-204-AC": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-FRD-205": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-FRD-205-AC": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-FRD-301": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-FRD-301-AC": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-FRD-302": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-FRD-302-AC": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-FRD-302-RT": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-FRD-303": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-FRD-303-AC": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-FRD-401": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-FRD-401-AC": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-FRD-402": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-FRD-402-AC": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-FRD-403": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-FRD-403-AC": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-FRD-501": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-FRD-502": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-FRD-601": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-FRD-602": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-FRD-701": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-FRD-702": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-FRD-703": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-FRD-704": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-FUTURE-AUTO-001": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-FUTURE-AUTO-002": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-FUTURE-AUTO-003": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-FUTURE-FEE-001": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-FUTURE-FEE-002": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-FUTURE-SEALED-001": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-FUTURE-SEALED-002": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-LOGGING-001": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-M-002": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-M-003": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-M-004": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-M-005": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-M-006": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-M-007": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-M-008": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-M-009": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-M-010": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-M-011": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-M-012": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-M-013": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-M-014": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-M-015": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-M-016": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-M-017": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-M-018": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-M-019": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-M-020": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-M-021": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-M-022": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-M-023": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-M-024": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-M-025": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-M-026": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-M-027": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-M-028": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-NFR-001": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-NOTIF": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-OPS-002": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-OPS-003": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-OPS-004": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-OPS-005": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-OPS-006": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-OPS-007": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-OPS-008": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-OPS-009": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-OPS-010": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-OPS-011": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-OPS-012": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-OPS-013": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-OPS-014": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-OPS-015": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-OPS-016": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-OPS-017": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-OPS-018": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-OPS-019": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-OPS-020": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-OPS-021": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-OPS-022": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-OPS-023": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-OPS-024": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-OPS-025": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-P-005": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-P-006": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-P-007": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-P-008": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-P-009": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-P-010": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-P-011": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-P-012": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-P-013": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-P-014": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-P-015": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-P-016": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-PERF-001": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-PERFORMANCE-CACHING-001": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-PERFORMANCE-MONITORING-001": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-POST": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-PRC-001": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-PROXY": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-PROXY-": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-Q-001": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-QUAL-003": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-QUEUE-ARCH-001": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-QUEUE-ARCH-002": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-QUEUE-ARCH-003": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-QUEUE-DB-001": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-QUEUE-EXCEPTIONS-001": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-QUEUE-FACTORY-001": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-QUEUE-JOB-001": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-QUEUE-STATUS-001": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-REPOSITORY-001": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-S-002": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-S-003": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-S-004": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-S-005": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-S-006": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-S-007": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-S-008": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-S-009": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-S-010": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-S-011": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-S-012": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-S-013": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-S-014": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-S-015": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-S-016": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-S-017": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-S-018": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-SEALED-BID-AUTH-001": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-SEALED-BID-DATABASE-001": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-SEALED-BID-STORAGE-001": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-SEC-002": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-SEC-003": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-SEC-004": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-SEC-005": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-SEC-006": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-SEC-007": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-SEC-008": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-SEC-009": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-SEC-010": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-SEC-011": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-SEC-012": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-SEC-013": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-SEC-014": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-SEC-015": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-SEC-016": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-SEC-017": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-SEC-018": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-SEC-019": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-SEC-020": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-SEC-021": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-SEC-022": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-SEC-023": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-SEC-024": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-SEC-025": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-SEC-026": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-SEC-027": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-SEC-028": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-SEC-029": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-SEC-030": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-SEC-031": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-SEC-032": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-SEC-033": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-SEC-034": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-SEC-035": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-SEC-036": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-SEC-037": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-SEC-038": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-SECURITY-001": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-SECURITY-002": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-SECURITY-SQL-001": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-SET": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-SET-001": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-SET-002": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-SET-003": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-SET-004": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-T-001": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-U-002": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-U-003": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-U-004": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-U-005": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-U-006": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-U-007": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-U-008": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-U-009": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-U-010": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-U-011": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-U-012": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-U-013": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-U-014": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-U-015": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-U-016": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-U-017": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-UAT-002": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-UAT-003": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-UAT-004": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-VAL": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-VAL-": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-VALIDATION-001": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-WORDPRESS-ADMIN-001": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-WORDPRESS-ADMIN-001-004": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-WORDPRESS-ADMIN-002": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-WORDPRESS-ADMIN-003": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-WORDPRESS-ADMIN-004": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-WORDPRESS-CAPS-001": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-WORDPRESS-CAPS-001-003": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-WORDPRESS-CAPS-002": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-WORDPRESS-CAPS-003": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-WORDPRESS-PAGES-001": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-WORDPRESS-PAGES-002": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-WORDPRESS-THEME-001": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-WORDPRESS-THEME-001-002": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-WORDPRESS-THEME-002": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQ-XXX": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQUIRED": {
+    "mentions": 0,
+    "files": []
+  },
+  "REQUIREMENT": {
+    "mentions": 0,
+    "files": []
+  }
+}

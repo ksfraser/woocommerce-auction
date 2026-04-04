@@ -1,3 +1,98 @@
+# AGENTS.md - AI Agent Guidelines 
+
+This document provides guidance for AI agents (including GitHub Copilot) working on the project. It documents best practices, architectural context, and token-efficient workflows.
+
+## Token Efficiency Guidelines
+
+### Problem
+Large test suites and verbose output parsing can burn excessive tokens when agents repeatedly:
+- Run tests multiple times attempting different parsing strategies
+- Parse unstructured terminal output with limited success
+- Re-execute commands on parse failures
+
+### Solution: Structured Output Extraction
+
+**Always run tests with structured output formats**, then parse locally with PHP:
+
+```bash
+# Generate XML results (machine-readable, reliable parsing)
+php vendor/bin/phpunit phpunit.xml --log-junit=test-results.xml --no-coverage
+```
+
+**Parse results with dedicated PHP script** instead of terminal pattern matching:
+
+```php
+<?php
+$xml = simplexml_load_file('test-results.xml');
+echo json_encode([
+    'tests' => (int)$xml['tests'],
+    'passed' => (int)$xml['tests'] - (int)$xml['errors'] - (int)$xml['failures'],
+    'errors' => (int)$xml['errors'],
+    'failures' => (int)$xml['failures'],
+    'skipped' => (int)$xml['skipped'],
+], JSON_PRETTY_PRINT);
+```
+
+### Best Practices for Agents
+
+1. **Run tests ONCE with structured output**
+   - Use `--log-junit=test-results.xml` for XML output
+   - NOT: Multiple test runs with different terminal parsing strategies
+
+2. **Share results files, not re-execute**
+   - When analysis needed: `Run: php scripts/parse-tests.php > test-summary.json`
+   - Share the JSON output in chat
+   - Ask focused questions about specific failures (e.g., "Why is XYZTest failing?")
+   - NOT: "Can you run the tests again to see the results?"
+
+3. **Avoid large text output parsing**
+   - Terminal output parsing is unreliable due to encoding issues (UTF-16 BOM, multi-line content)
+   - Structured formats (XML, JSON) are machine-readable and reliable
+   - NOT: `Select-String`, `grep`, `tail` patterns on test output
+
+4. **Use subagents for complex exploration**
+   - For codebase exploration: Use `Explore` subagent instead of chaining multiple reads
+   - For architectural analysis: Use `architecture-blueprint-generator` skill
+   - Reduces back-and-forth and token usage
+
+## Test Workflow Architecture
+
+### Current State
+- **Framework**: PHPUnit 9.6.34
+- **Bootstrap**: `tests/bootstrap.php` (FA function mocks, FAMock loading)
+- **Configuration**: `phpunit.xml` with multiple test suites
+- **Output**: XML results via `--log-junit` flag
+
+## Scripts to Use
+
+### Existing Scripts
+- `scripts/parse-tests.php` - Parse XML results to JSON (create if missing)
+- `phpunit.xml` - Full test configuration (all suites)
+
+### Useful VS Code Tasks
+- `shell: phpunit-full-now` - Full suite, no coverage
+- `shell: phpunit-root` - Root tests only
+- `shell: phpunit-bi` - BiLineItem tests (legacy focus)
+
+## When to NOT Run Tests
+
+- Analyzing code architecture → Use code search and semantic_search
+- Checking for syntax errors → Use `php -l filename.php`
+- Understanding test structure → Read test files directly
+- Debugging specific logic → Run targeted single test or use xdebug
+
+Run full suite ONLY when:
+1. Testing a complete feature implementation
+2. Verifying no regressions after architectural changes
+3. Establishing baseline after major refactoring
+
+## References
+
+- **Conversation Memory**: `/memories/session/` - Current task notes
+- **Repository Memory**: `/memories/repo/` - Project-specific facts
+- **Skill Files**: Use `create-implementation-plan`, `breakdown-plan` for major work
+
+
 # Technical Requirements
 
 ## Souce Control
@@ -35,7 +130,7 @@ Core module manages foundational data structure:
 
 - **Normalized Schema**: Proper normalization for data integrity
 - **Indexing Strategy**: Performance-optimized indexing
-- **Migration Support**: Versioned database migrations
+- **Migration Support**: Versioned datSOLIDabase migrations
 - **Audit Trails**: Change tracking and audit logging
 
 Plugins can extend with additional tables following established patterns.
